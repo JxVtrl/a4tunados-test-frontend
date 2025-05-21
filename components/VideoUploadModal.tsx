@@ -21,7 +21,7 @@ export default function VideoUploadModal({ open, onClose, onVideoUploaded }: { o
         formData.append('descricao', data.descricao);
         formData.append('arquivo', data.videoFile);
         if (data.playlists && data.playlists.length > 0) {
-            data.playlists.forEach((pl: any) => formData.append('playlists', pl.id));
+            data.playlists.forEach((pl: any) => formData.append('playlists_ids', pl.id));
         }
         try {
             const res = await fetch('http://localhost:8000/api/videos/', {

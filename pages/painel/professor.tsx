@@ -5,6 +5,7 @@ import Navbar from '../../components/Navbar';
 import VideoForm from '../../components/VideoForm';
 import VideoCard from '../../components/VideoCard';
 import VideoUploadModal from '../../components/VideoUploadModal';
+import PlaylistCard from '@/components/PlaylistCard';
 
 interface Video {
     id: number;
@@ -15,22 +16,29 @@ interface Video {
     playlists?: { id: number }[];
 }
 
+interface Playlist {
+    id: number;
+    nome: string;
+}
+
 export default function PainelProfessor() {
     const { token } = useAuth();
     const [videos, setVideos] = useState<Video[]>([]);
+    const [playlists, setPlaylists] = useState<Playlist[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [showUploadModal, setShowUploadModal] = useState(false);
 
+
     useEffect(() => {
         if (!token) return;
         setLoading(true);
-        fetch('http://localhost:8000/api/videos/', {
+        fetch('http://localhost:8000/api/playlists/', {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(res => res.json())
-            .then(data => setVideos(data))
-            .catch(() => setError('Erro ao carregar vídeos.'))
+            .then(data => setPlaylists(data))
+            .catch(() => setError('Erro ao carregar playlists.'))
             .finally(() => setLoading(false));
     }, [token]);
 
@@ -48,6 +56,19 @@ export default function PainelProfessor() {
             setError('Erro ao excluir vídeo.');
         }
     };
+
+    const handlePlaylistClick = (playlistId: number) => {
+        console.log(`Playlist clicada: ${playlistId}`);
+        setLoading(true);
+        fetch(`http://localhost:8000/api/playlists/${playlistId}/videos/`, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+            .then(res => res.json())
+            .then(data => setVideos(data))
+            .finally(() => setLoading(false));
+    };
+
+
 
     return (
         <ProtectedRoute allowedTypes={['professor']}>
@@ -77,21 +98,39 @@ export default function PainelProfessor() {
                         }}
                     />
                     {loading && <p className="text-center">Carregando vídeos...</p>}
-                    <h3 className="text-lg font-semibold mb-4">Seus vídeos ({videos.length})</h3>
+
+                    {error && <p className="text-center text-red-500">{error}</p>}
+
+                    <h3 className="text-lg font-semibold mb-4">Suas playlists ({playlists.length})</h3>
                     <ul>
-                        {videos.map(video => (
-                            <VideoCard
-                                key={video.id}
-                                titulo={video.titulo}
-                                descricao={video.descricao}
-                                link={video.arquivo}
-                                criado_em={video.criado_em}
-                                playlists={video.playlists?.map((p: any) => ({ id: p.id, nome: p.nome }))}
-                                onDelete={() => handleDelete(video.id)}
-                                showActions
+                        {playlists.map(playlist => (
+                            <PlaylistCard
+                                key={playlist.id}
+                                nome={playlist.nome}
+                                onClick={() => handlePlaylistClick(playlist.id)}
                             />
                         ))}
                     </ul>
+
+                    {videos.length > 0 && (
+                        <div className="mt-4">
+                            <h3 className="text-lg font-semibold mb-2">Vídeos da playlist {playlists.find(p => p.id === videos[0].playlists?.[0]?.id)?.nome}</h3>
+                            <ul>
+                                {videos.map(video => (
+                                    <VideoCard
+                                        key={video.id}
+                                        titulo={video.titulo}
+                                        descricao={video.descricao}
+                                        link={video.arquivo}
+                                        criado_em={video.criado_em}
+                                        onDelete={() => handleDelete(video.id)}
+                                        showActions
+                                        id={video.id}
+                                    />
+                                ))}
+                            </ul>
+                        </div>
+                    )}
                 </div>
             </div>
         </ProtectedRoute>
