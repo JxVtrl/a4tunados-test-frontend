@@ -1,16 +1,31 @@
 // frontend/components/VideoDetailsStep.tsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PlaylistSelectModal from './PlaylistSelectModal';
+import { useAuth } from '@/utils/AuthContext';
 
 export default function VideoDetailsStep({ videoFile, onBack, onSubmit }: { videoFile: File, onBack: () => void, onSubmit: (data: any) => void }) {
     const [titulo, setTitulo] = useState('');
     const [descricao, setDescricao] = useState('');
     const [playlists, setPlaylists] = useState<any[]>([]);
+    const [selected, setSelected] = useState<any[]>([]);
     const [showPlaylistModal, setShowPlaylistModal] = useState(false);
+    const { token } = useAuth();
 
     const handleSave = () => {
         onSubmit({ titulo, descricao, playlists, videoFile });
     };
+
+    const buscarPlaylists = () => {
+        fetch('http://localhost:8000/api/playlists/', {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+            .then(res => res.json())
+            .then(data => setPlaylists(data));
+    }
+
+    useEffect(() => {
+        buscarPlaylists()
+    }, []);
 
     return (
         <div className="p-6">
@@ -24,14 +39,26 @@ export default function VideoDetailsStep({ videoFile, onBack, onSubmit }: { vide
                 <textarea className="w-full border rounded px-2 py-1" value={descricao} onChange={e => setDescricao(e.target.value)} />
             </div>
             <div className="mb-4">
-                <label className="block font-semibold">Playlists</label>
-                <button className="border px-2 py-1 rounded" onClick={() => setShowPlaylistModal(true)}>
-                    Selecionar playlists
-                </button>
+                <div className="flex justify-between items-center gap-2">
+                    <label className="block font-semibold">Playlists</label>
+                    <button className="border px-2 py-1 rounded" onClick={() => setShowPlaylistModal(true)}>
+                        Criar playlist
+                    </button>
+                </div>
                 {playlists.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-2">
-                        {playlists.map((pl: any) => (
-                            <span key={pl.id} className="bg-blue-200 px-2 py-1 rounded">{pl.nome}</span>
+                        {playlists.map(pl => (
+                            <div key={pl.id} className="flex items-center mb-2">
+                                <input
+                                    type="checkbox"
+                                    checked={selected.some((s: any) => s.id === pl.id)}
+                                    onChange={e => {
+                                        if (e.target.checked) setSelected([...selected, pl]);
+                                        else setSelected(selected.filter((s: any) => s.id !== pl.id));
+                                    }}
+                                />
+                                <span className="ml-2">{pl.nome}</span>
+                            </div>
                         ))}
                     </div>
                 )}
@@ -44,7 +71,10 @@ export default function VideoDetailsStep({ videoFile, onBack, onSubmit }: { vide
                 <PlaylistSelectModal
                     selected={playlists}
                     onSelect={setPlaylists}
-                    onClose={() => setShowPlaylistModal(false)}
+                    onClose={() => {
+                        setShowPlaylistModal(false)
+                        buscarPlaylists()
+                    }}
                 />
             )}
         </div>

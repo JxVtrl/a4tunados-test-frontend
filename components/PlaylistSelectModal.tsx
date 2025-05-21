@@ -7,6 +7,7 @@ export default function PlaylistSelectModal({ selected, onSelect, onClose }: { s
     const [nova, setNova] = useState('');
     const [novaDescricao, setNovaDescricao] = useState('');
     const { token } = useAuth();
+
     useEffect(() => {
         fetch('http://localhost:8000/api/playlists/', {
             headers: {
@@ -19,8 +20,33 @@ export default function PlaylistSelectModal({ selected, onSelect, onClose }: { s
     }, []);
 
     const handleCriar = () => {
-        // Chame a API para criar playlist, depois atualize a lista
-        // Exemplo simplificado:
+        if (nova === '') {
+            alert('O nome da playlist é obrigatório');
+            return;
+        }
+
+        if (novaDescricao === '') {
+            alert('A descrição da playlist é obrigatória');
+            return;
+        }
+
+        if (nova.length > 50) {
+            alert('O nome da playlist deve ter menos de 50 caracteres');
+            return;
+        }
+
+        if (novaDescricao.length > 100) {
+            alert('A descrição da playlist deve ter menos de 100 caracteres');
+            return;
+        }
+
+        if (playlists.some((pl: any) => pl.nome === nova)) {
+            alert('Já existe uma playlist com este nome');
+            return;
+        }
+
+
+
         fetch('http://localhost:8000/api/playlists/', {
             method: 'POST',
             headers: {
@@ -41,23 +67,7 @@ export default function PlaylistSelectModal({ selected, onSelect, onClose }: { s
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
             <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative">
                 <button className="absolute top-2 right-2 text-2xl" onClick={onClose}>×</button>
-                <h3 className="text-lg font-bold mb-4">Selecionar Playlists</h3>
-                <div className="mb-4 max-h-40 overflow-y-auto">
-                    {playlists.length === 0 && <p>Nenhuma playlist disponível</p>}
-                    {playlists.map(pl => (
-                        <div key={pl.id} className="flex items-center mb-2">
-                            <input
-                                type="checkbox"
-                                checked={selected.some((s: any) => s.id === pl.id)}
-                                onChange={e => {
-                                    if (e.target.checked) onSelect([...selected, pl]);
-                                    else onSelect(selected.filter((s: any) => s.id !== pl.id));
-                                }}
-                            />
-                            <span className="ml-2">{pl.nome}</span>
-                        </div>
-                    ))}
-                </div>
+                <h3 className="text-lg font-bold mb-2">Criar playlist</h3>
                 <div className="flex flex-col gap-2">
                     <input
                         className="border rounded px-2 py-1 flex-1"
