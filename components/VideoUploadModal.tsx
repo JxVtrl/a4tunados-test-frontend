@@ -7,7 +7,6 @@ import { useAuth } from '../utils/AuthContext';
 export default function VideoUploadModal({ open, onClose, onVideoUploaded }: { open: boolean, onClose: () => void, onVideoUploaded: () => void }) {
     const [step, setStep] = useState(1);
     const [videoFile, setVideoFile] = useState<File | null>(null);
-    const [videoData, setVideoData] = useState<any>({});
     const { token } = useAuth();
 
     const handleVideoSelected = (file: File) => {
@@ -16,7 +15,6 @@ export default function VideoUploadModal({ open, onClose, onVideoUploaded }: { o
     };
 
     const handleDetailsSubmit = async (data: any) => {
-        setVideoData(data);
         // Envia o vídeo para o backend
         const formData = new FormData();
         formData.append('titulo', data.titulo);
@@ -37,6 +35,8 @@ export default function VideoUploadModal({ open, onClose, onVideoUploaded }: { o
             if (!res.ok) throw new Error('Erro ao enviar vídeo');
             onVideoUploaded();
             onClose();
+            setStep(1);
+            setVideoFile(null);
         } catch (e) {
             alert('Erro ao enviar vídeo');
         }
@@ -47,7 +47,11 @@ export default function VideoUploadModal({ open, onClose, onVideoUploaded }: { o
     return (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
             <div className="bg-white rounded-xl shadow-lg w-full max-w-2xl p-0 relative">
-                <button className="absolute top-2 right-2 text-2xl" onClick={onClose}>×</button>
+                <button className="absolute top-2 right-2 text-2xl" onClick={() => {
+                    setStep(1);
+                    setVideoFile(null);
+                    onClose();
+                }}>×</button>
                 {step === 1 && <VideoDropStep onVideoSelected={handleVideoSelected} />}
                 {step === 2 && videoFile && (
                     <VideoDetailsStep
