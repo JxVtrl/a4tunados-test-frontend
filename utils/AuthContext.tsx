@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/router';
+import Cookies from 'js-cookie';
 
 interface User {
     username: string;
@@ -19,9 +20,24 @@ const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
-    const [token, setToken] = useState<string | null>(null);
+    const [token, setTokenState] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
+
+    useEffect(() => {
+        // Ao carregar, busca o token do cookie
+        const cookieToken = Cookies.get('token');
+        if (cookieToken) setTokenState(cookieToken);
+    }, []);
+
+    const setToken = (newToken: string | null) => {
+        setTokenState(newToken);
+        if (newToken) {
+            Cookies.set('token', newToken, { expires: 7 }); // 7 dias logado
+        } else {
+            Cookies.remove('token');
+        }
+    };
 
     useEffect(() => {
         const access = localStorage.getItem('access');
