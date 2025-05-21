@@ -154,34 +154,37 @@ export default function PainelAluno() {
 
                     {/* Controles de Busca, Filtro e Ordenação (Mostrar apenas na lista geral de vídeos) */}
                     {!playlistSelecionada && (
-                        <div className="flex flex-wrap gap-4 mb-6">
+                        <div className="flex flex-col md:flex-row gap-4 mb-6 w-full">
                             <input
                                 type="text"
                                 placeholder="Buscar vídeos..."
-                                className="px-3 py-2 border rounded shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                className="px-3 py-2 border rounded shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 w-full"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
-                            <select
-                                className="px-3 py-2 border rounded shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                value={filterPlaylistId}
-                                onChange={(e) => setFilterPlaylistId(e.target.value)}
-                            >
-                                <option value="">Todas as Playlists</option>
-                                {playlists.map(pl => (
-                                    <option key={pl.id} value={pl.id}>{pl.nome}</option>
-                                ))}
-                            </select>
-                            <select
-                                className="px-3 py-2 border rounded shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                value={sortOption}
-                                onChange={(e) => setSortOption(e.target.value)}
-                            >
-                                <option value="criado_em">Ordenar por Data</option>
-                                <option value="titulo">Ordenar por Nome</option>
-                                {/* Adicione "duracao" como opção de ordenação se tiver o dado no backend */}
-                                {/* <option value="duracao">Ordenar por Duração</option> */}
-                            </select>
+                            <div className='flex flex-row gap-2'>
+                                <select
+                                    className="py-2 border rounded shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 w-full md:min-w-[250px]"
+                                    value={filterPlaylistId}
+                                    onChange={(e) => setFilterPlaylistId(e.target.value)}
+                                >
+                                    <option value="">Todas as Playlists</option>
+                                    {playlists.map(pl => (
+                                        <option key={pl.id} value={pl.id}>{pl.nome}</option>
+                                    ))}
+                                </select>
+                                <select
+                                    className="py-2 border rounded shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 w-full md:min-w-[250px]"
+                                    value={sortOption}
+                                    onChange={(e) => setSortOption(e.target.value)}
+                                >
+                                    <option value="criado_em">Ordenar por Data</option>
+                                    <option value="titulo">Ordenar por Nome</option>
+                                    {/* Adicione "duracao" como opção de ordenação se tiver o dado no backend */}
+                                    {/* <option value="duracao">Ordenar por Duração</option> */}
+                                </select>
+                            </div>
+
                         </div>
                     )}
 
