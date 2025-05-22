@@ -61,7 +61,7 @@ export default function VideoPage() {
   return (
     <ProtectedRoute allowedTypes={[`aluno`, `professor`]}>
       <Navbar />
-      <div className="p-8 bg-gray-100 min-h-screen">
+      <div className="p-8 bg-gray-100 mt-10 min-h-screen">
         <Breadcrumb
           items={[
             {
