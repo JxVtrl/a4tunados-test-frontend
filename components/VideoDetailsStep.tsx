@@ -1,7 +1,7 @@
 // frontend/components/VideoDetailsStep.tsx
 import React, { useEffect, useState } from 'react';
 import PlaylistSelectModal from './PlaylistSelectModal';
-import { useAuth } from '@/utils/AuthContext';
+import api from '@/utils/axiosConfig';
 
 export default function VideoDetailsStep({ videoFile, onBack, onSubmit }: { videoFile: File, onBack: () => void, onSubmit: (data: any) => void }) {
     const [titulo, setTitulo] = useState('');
@@ -9,18 +9,16 @@ export default function VideoDetailsStep({ videoFile, onBack, onSubmit }: { vide
     const [playlists, setPlaylists] = useState<any[]>([]);
     const [selected, setSelected] = useState<any[]>([]);
     const [showPlaylistModal, setShowPlaylistModal] = useState(false);
-    const { token } = useAuth();
 
     const handleSave = () => {
         onSubmit({ titulo, descricao, playlists: selected, videoFile });
     };
 
     const buscarPlaylists = async () => {
-        await fetch('http://localhost:8000/api/playlists/', {
-            headers: { Authorization: `Bearer ${token}` }
+        await api.get('playlists/', {
+            withCredentials: true
         })
-            .then(res => res.json())
-            .then(data => setPlaylists(data));
+            .then(res => setPlaylists(res.data));
     }
 
     useEffect(() => {

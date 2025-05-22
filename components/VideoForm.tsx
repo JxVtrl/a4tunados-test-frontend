@@ -1,5 +1,6 @@
-import { useAuth } from '@/utils/AuthContext';
+
 import { useState, useEffect } from 'react';
+import api from '@/utils/axiosConfig';
 
 interface Playlist {
     id: number;
@@ -28,32 +29,23 @@ export default function VideoForm({ onSubmit, initialData, loading, success, err
     const [playlistLoading, setPlaylistLoading] = useState(false);
     const [playlistError, setPlaylistError] = useState('');
 
-    const { token } = useAuth();
 
     useEffect(() => {
-        fetch('http://localhost:8000/api/playlists/', {
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`
-            }
+        api.get('playlists/', {
+            withCredentials: true
         })
-            .then(res => res.json())
-            .then(data => setPlaylists(data))
-            .catch(() => setPlaylists([]));
-    }, [token]);
+            .then(res => setPlaylists(res.data));
+    }, []);
 
     const handlePlaylistCreate = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!novaPlaylist.trim()) return;
         setPlaylistLoading(true); setPlaylistError('');
         try {
-            const res = await fetch('http://localhost:8000/api/playlists/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                body: JSON.stringify({ nome: novaPlaylist })
+            const res = await api.post('playlists/', { nome: novaPlaylist }, {
+                withCredentials: true
             });
-            if (!res.ok) throw new Error('Erro ao criar playlist');
-            const playlist = await res.json();
+            const playlist = res.data as Playlist;
             setPlaylists([...playlists, playlist]);
             setPlaylistsIds([...playlistsIds, playlist.id]);
             setNovaPlaylist('');

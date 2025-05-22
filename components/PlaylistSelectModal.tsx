@@ -1,25 +1,20 @@
 // frontend/components/PlaylistSelectModal.tsx
-import { useAuth } from '@/utils/AuthContext';
+import api from '@/utils/axiosConfig';
 import React, { useEffect, useState } from 'react';
 
 export default function PlaylistSelectModal({ onClose }: { onClose: () => void }) {
     const [playlists, setPlaylists] = useState<any[]>([]);
     const [nova, setNova] = useState('');
     const [novaDescricao, setNovaDescricao] = useState('');
-    const { token } = useAuth();
 
     useEffect(() => {
-        fetch('http://localhost:8000/api/playlists/', {
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`
-            }
+        api.get('playlists/', {
+            withCredentials: true
         })
-            .then(res => res.json())
-            .then(data => setPlaylists(data));
+            .then(res => setPlaylists(res.data));
     }, []);
 
-    const handleCriar =  async () => {
+    const handleCriar = async () => {
         if (nova === '') {
             alert('O nome da playlist é obrigatório');
             return;
@@ -47,16 +42,10 @@ export default function PlaylistSelectModal({ onClose }: { onClose: () => void }
 
 
 
-        await fetch('http://localhost:8000/api/playlists/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`
-            },
-            body: JSON.stringify({ nome: nova, descricao: novaDescricao })
+        await api.post('playlists/', { nome: nova, descricao: novaDescricao }, {
+            withCredentials: true
         })
-            .then(res => res.json())
-            .then(pl => setPlaylists([...playlists, pl]));
+            .then(res => setPlaylists([...playlists, res.data]));
         setNova('');
         setNovaDescricao('');
 

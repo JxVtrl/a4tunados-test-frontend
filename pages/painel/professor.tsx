@@ -8,6 +8,7 @@ import { useRouter } from "next/router"
 import Breadcrumb from "@/components/Breadcrumb"
 import EditPlaylistModal from "@/components/EditPlaylistModal"
 import Image from "next/image"
+import api from "@/utils/axiosConfig"
 
 interface Playlist {
   id: number
@@ -29,7 +30,6 @@ interface Video {
 }
 
 export default function PainelProfessor() {
-  const { token } = useAuth()
   const router = useRouter()
   const { playlist: playlistIdQuery } = router.query
 
@@ -43,39 +43,23 @@ export default function PainelProfessor() {
   const [playlistToEdit, setPlaylistToEdit] = useState<Playlist | null>(null)
 
   useEffect(() => {
-    if (!token) return
     setLoading(true)
 
     // Buscar todas as playlists do professor
-    fetch("http://localhost:8000/api/playlists/", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then((data) => setPlaylists(data))
+    api.get("playlists/")
+      .then((res) => setPlaylists(res.data))
       .catch(() => setPlaylists([]))
 
     // Se há um playlistId na URL, buscar os vídeos dessa playlist específica
     if (playlistIdQuery) {
       const id = Number(playlistIdQuery)
-      fetch(`http://localhost:8000/api/playlists/${id}/`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      api.get(`playlists/${id}/`)
         .then((res) => {
-          if (!res.ok) {
-            router.push("/painel/professor") // Redirecionar se não encontrar
-            throw new Error("Playlist not found")
-          }
-          return res.json()
-        })
-        .then((playlistData) => {
-          setPlaylistSelecionada(playlistData)
+          setPlaylistSelecionada(res.data)
           // Buscar os vídeos dessa playlist específica
-          fetch(`http://localhost:8000/api/playlists/${id}/videos/`, {
-            headers: { Authorization: `Bearer ${token}` },
-          })
-            .then((res) => res.json())
-            .then((videoData) => {
-              setAllVideos(videoData)
+          api.get(`playlists/${id}/videos/`)
+            .then((res) => {
+              setAllVideos(res.data)
               setLoading(false)
             })
             .catch(() => {
@@ -84,20 +68,17 @@ export default function PainelProfessor() {
             })
         })
         .catch((error) => {
-          console.error("Erro ao carregar playlist específica:", error)
+          router.push("/painel/professor")
           setLoading(false)
         })
     } else {
       // Se não tem playlistId na URL, buscar todos os vídeos do professor
       setPlaylistSelecionada(null)
-      fetch("http://localhost:8000/api/videos/", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => res.json())
-        .then((data) => setAllVideos(data))
+      api.get("videos/")
+        .then((res) => setAllVideos(res.data))
         .finally(() => setLoading(false))
     }
-  }, [token, playlistIdQuery, router])
+  }, [playlistIdQuery, router])
 
   const handlePlaylistClickInCard = (playlistId: number) => {
     router.push(`/painel/professor?playlist=${playlistId}`)
@@ -116,15 +97,12 @@ export default function PainelProfessor() {
     setPlaylistToEdit(playlist)
     setIsEditModalOpen(true)
   }
-    
-    const fetchPlaylists = () => {
-      fetch("http://localhost:8000/api/playlists/", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => res.json())
-        .then((data) => setPlaylists(data))
-        .catch(() => setPlaylists([]))
-    }
+
+  const fetchPlaylists = () => {
+    api.get("playlists/")
+      .then((res) => setPlaylists(res.data))
+      .catch(() => setPlaylists([]))
+  }
 
   return (
     <ProtectedRoute allowedTypes={["professor"]}>
@@ -173,18 +151,19 @@ export default function PainelProfessor() {
                 key={playlist.id}
                 className="p-4 bg-white rounded shadow cursor-pointer hover:bg-gray-50"
                 onClick={() => handlePlaylistClickInCard(playlist.id)}
-                >
-                    <Image
-                        src={playlist.foto || "/default_playlist.png"}
-                        alt={playlist.nome}
-                        width={200}
-                        height={200}
-                        className="w-full object-cover rounded mb-2"
-                        style={{
-                        aspectRatio: 1}}
-                    />
-                    <h3 className="text-lg font-semibold">{playlist.nome}</h3>
-                    <p className="text-gray-500">{playlist.descricao}</p>
+              >
+                <Image
+                  src={playlist.foto || "/default_playlist.png"}
+                  alt={playlist.nome}
+                  width={200}
+                  height={200}
+                  className="w-full object-cover rounded mb-2"
+                  style={{
+                    aspectRatio: 1
+                  }}
+                />
+                <h3 className="text-lg font-semibold">{playlist.nome}</h3>
+                <p className="text-gray-500">{playlist.descricao}</p>
               </div>
             ))}
           </div>

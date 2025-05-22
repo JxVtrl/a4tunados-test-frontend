@@ -2,12 +2,11 @@
 import React, { useState } from 'react';
 import VideoDropStep from './VideoDropStep';
 import VideoDetailsStep from './VideoDetailsStep';
-import { useAuth } from '../utils/AuthContext';
+import api from '@/utils/axiosConfig';
 
 export default function VideoUploadModal({ open, onClose, onVideoUploaded }: { open: boolean, onClose: () => void, onVideoUploaded: () => void }) {
     const [step, setStep] = useState(1);
     const [videoFile, setVideoFile] = useState<File | null>(null);
-    const { token } = useAuth();
 
     const handleVideoSelected = (file: File) => {
         setVideoFile(file);
@@ -24,15 +23,10 @@ export default function VideoUploadModal({ open, onClose, onVideoUploaded }: { o
             data.playlists.forEach((pl: any) => formData.append('playlists_ids', pl.id));
         }
         try {
-            const res = await fetch('http://localhost:8000/api/videos/', {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${token}`
-                    // Não defina Content-Type, o browser faz isso automaticamente para FormData
-                },
-                body: formData,
+            const res = await api.post('videos/', formData, {
+                withCredentials: true
             });
-            if (!res.ok) throw new Error('Erro ao enviar vídeo');
+            if (res.status !== 201) throw new Error('Erro ao enviar vídeo');
             onVideoUploaded();
             onClose();
             setStep(1);

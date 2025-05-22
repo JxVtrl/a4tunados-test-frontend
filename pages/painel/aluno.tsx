@@ -1,10 +1,10 @@
 import { useEffect, useState, useMemo } from "react" // Importar useMemo
-import { useAuth } from "../../utils/AuthContext"
 import ProtectedRoute from "../../components/ProtectedRoute"
 import Navbar from "../../components/Navbar"
 import VideoCard from "../../components/VideoCard"
 import { useRouter } from "next/router"
 import Breadcrumb from "@/components/Breadcrumb"
+import api from "@/utils/axiosConfig"
 
 interface Playlist {
   id: number
@@ -24,7 +24,6 @@ interface Video {
 }
 
 export default function PainelAluno() {
-  const { token } = useAuth()
   const router = useRouter()
   const { playlist: playlistIdQuery } = router.query
 
@@ -38,39 +37,23 @@ export default function PainelAluno() {
   const [sortOption, setSortOption] = useState("criado_em") // Estado para ordenação
 
   useEffect(() => {
-    if (!token) return
     setLoading(true)
 
     // Sempre buscar todas as playlists para popular o filtro dropdown
-    fetch("http://localhost:8000/api/playlists/", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then((data) => setPlaylists(data))
+    api.get("playlists/")
+      .then((res) => setPlaylists(res.data))
       .catch(() => setPlaylists([]))
 
     // Se há um playlistId na URL, buscar os vídeos dessa playlist específica
     if (playlistIdQuery) {
       const id = Number(playlistIdQuery)
-      fetch(`http://localhost:8000/api/playlists/${id}/`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      api.get(`playlists/${id}/`)
         .then((res) => {
-          if (!res.ok) {
-            router.push("/painel/aluno") // Redirecionar se não encontrar
-            throw new Error("Playlist not found")
-          }
-          return res.json()
-        })
-        .then((playlistData) => {
-          setPlaylistSelecionada(playlistData)
+          setPlaylistSelecionada(res.data)
           // Buscar os vídeos dessa playlist específica
-          fetch(`http://localhost:8000/api/playlists/${id}/videos/`, {
-            headers: { Authorization: `Bearer ${token}` },
-          })
-            .then((res) => res.json())
-            .then((videoData) => {
-              setAllVideos(videoData) // Define os vídeos da playlist como a lista base
+          api.get(`playlists/${id}/videos/`)
+            .then((res) => {
+              setAllVideos(res.data)
               setLoading(false)
             })
             .catch(() => {
@@ -79,21 +62,18 @@ export default function PainelAluno() {
             })
         })
         .catch((error) => {
-          console.error("Erro ao carregar playlist específica:", error)
+          router.push("/painel/aluno")
           setLoading(false)
         })
     } else {
       // Se não tem playlistId na URL, buscar todos os vídeos por padrão
       setPlaylistSelecionada(null) // Garantir que não estamos no modo playlist específica
       setFilterPlaylistId("") // Resetar filtro de playlist ao sair da view de playlist específica
-      fetch("http://localhost:8000/api/videos/", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => res.json())
-        .then((data) => setAllVideos(data)) // Define todos os vídeos como a lista base
+      api.get("videos/")
+        .then((res) => setAllVideos(res.data))
         .finally(() => setLoading(false))
     }
-  }, [token, playlistIdQuery, router]) // Adicionar dependências
+  }, [playlistIdQuery, router]) // Adicionar dependências
 
   // Lógica de filtragem, busca e ordenação usando useMemo para performance
   const filteredAndSortedVideos = useMemo(() => {

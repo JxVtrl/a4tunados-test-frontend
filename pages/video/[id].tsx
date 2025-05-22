@@ -7,6 +7,7 @@ import { useAuth } from "@/utils/AuthContext"
 import Breadcrumb from "@/components/Breadcrumb"
 import Navbar from "@/components/Navbar"
 import ProtectedRoute from "@/components/ProtectedRoute"
+import api from "@/utils/axiosConfig"
 
 interface Video {
   id: number
@@ -23,29 +24,18 @@ export default function VideoPage() {
   const [video, setVideo] = useState<Video | null>(null)
   const [playlistVideos, setPlaylistVideos] = useState<Video[]>([])
   const [outrosVideos, setOutrosVideos] = useState<Video[]>([])
-  const { token, user } = useAuth()
+  const { user } = useAuth()
   useEffect(() => {
     if (!id) return
     // Buscar o vídeo principal
-    fetch(`http://localhost:8000/api/videos/${id}/`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => res.json())
+    api.get(`videos/${id}/`)
+      .then((res) => res.data)
       .then((data) => {
         setVideo(data)
         // Se o vídeo tem playlists, buscar vídeos da primeira playlist
         if (data.playlists && data.playlists.length > 0) {
-          fetch(
-            `http://localhost:8000/api/playlists/${data.playlists[0].id}/videos/`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          )
-            .then((res) => res.json())
+          api.get(`playlists/${data.playlists[0].id}/videos/`)
+            .then((res) => res.data)
             .then((data) => {
               const filteredVideos = data.filter((item: any) => {
                 return item.id != id
@@ -56,12 +46,8 @@ export default function VideoPage() {
         }
       })
     // Buscar outros vídeos aleatórios
-    fetch("http://localhost:8000/api/videos/", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => res.json())
+    api.get("videos/")
+      .then((res) => res.data)
       .then((data: any) => {
         console.log(`data`, data)
         const filteredVideos = data.filter((item: any) => item.id !== id)

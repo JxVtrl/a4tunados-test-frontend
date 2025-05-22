@@ -1,4 +1,5 @@
-import { useAuth } from "@/utils/AuthContext"
+
+import api from "@/utils/axiosConfig"
 import Image from "next/image"
 import React, { useState } from "react"
 
@@ -18,31 +19,27 @@ export default function EditPlaylistModal({
   const [nome, setNome] = useState(playlist.nome)
   const [descricao, setDescricao] = useState(playlist.descricao)
   const [foto, setFoto] = useState<File | string | undefined>(playlist?.foto)
-  const { token } = useAuth()
 
   const handleSave = async () => {
-    const formData = new FormData()
-    formData.append("nome", nome)
-    formData.append("descricao", descricao)
-    if (foto) {
-      formData.append("foto", foto)
-    }
-
     try {
-      const res = await fetch(
-        `http://localhost:8000/api/playlists/${playlist.id}/`,
+      const formData = new FormData()
+      formData.append("nome", nome)
+      formData.append("descricao", descricao)
+      if (foto) {
+        formData.append("foto", foto)
+      }
+      const res = await api.put(
+        `playlists/${playlist.id}/`,
+        formData,
         {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
+          withCredentials: true,
         }
       )
 
-      if (!res.ok) {
+      if (res.status !== 200) {
         throw new Error("Erro ao salvar alterações")
       }
+      alert("Playlist editada com sucesso!")
 
       onSave()
       onClose()
