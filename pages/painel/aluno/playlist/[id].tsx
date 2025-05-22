@@ -45,7 +45,6 @@ export default function PlaylistAluno() {
                             descricao={video.descricao}
                             link={`/video/${video.id}`}
                             criado_em={video.criado_em}
-                            onClick={() => router.push(`/video/${video.id}`)}
                             professor_nome={video.professor_nome}
                             thumbnail={video.thumbnail}
                             professor_id={video.professor_id}

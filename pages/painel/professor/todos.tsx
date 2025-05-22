@@ -13,15 +13,19 @@ export default function TodosVideosProfessor() {
     const [loading, setLoading] = useState(false)
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
 
-    useEffect(() => {
+    const fetchVideos = () => {
         setLoading(true)
         api.get("videos/")
             .then((res) => setAllVideos(res.data))
             .finally(() => setLoading(false))
+    }
+
+    useEffect(() => {
+        fetchVideos()
     }, [])
 
     const handleVideoUploaded = () => {
-        router.replace(router.asPath)
+        fetchVideos()
         setIsUploadModalOpen(false)
     }
 
@@ -49,7 +53,6 @@ export default function TodosVideosProfessor() {
                             link={`/painel/professor/video/${video.id}`}
                             criado_em={video.criado_em}
                             professor_nome={video.professor_nome}
-                            onClick={() => router.push(`/painel/professor/video/${video.id}`)}
                             showActions
                             thumbnail={video.thumbnail}
                             professor_id={video.professor_id}

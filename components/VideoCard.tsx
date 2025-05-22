@@ -21,7 +21,6 @@ interface VideoCardProps {
   onDelete?: () => void
   showActions?: boolean
   duracao?: string // Pode ser string ou number dependendo do backend
-  onClick?: () => void // Clique no card inteiro
   professor_nome?: string
   thumbnail?: string // URL da miniatura
   professor_id?: number
@@ -36,27 +35,12 @@ export default function VideoCard({
   onDelete,
   showActions,
   duracao,
-  onClick,
+
   professor_nome,
   thumbnail,
   professor_id,
 }: VideoCardProps) {
   const [hovered, setHovered] = React.useState(false);
-
-  // Usar um div para o conteúdo clicável principal para não conflitar com botões internos
-  const handleCardClick = (e: React.MouseEvent) => {
-    console.log(e.target)
-    if (
-      e.target instanceof HTMLButtonElement ||
-      e.target instanceof HTMLSpanElement ||
-      e.target instanceof HTMLAnchorElement
-    ) {
-      return
-    }
-    if (onClick) {
-      onClick()
-    }
-  }
 
   return (
     <Link
@@ -65,7 +49,6 @@ export default function VideoCard({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{ minWidth: 0 }}
-      onClick={handleCardClick}
     >
       <div className="relative w-full flex-shrink-0 bg-black rounded-t-xl overflow-hidden flex items-center justify-center" style={{ aspectRatio: `16/9` }}>
         {thumbnail ? (

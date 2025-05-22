@@ -144,9 +144,8 @@ export default function VideoPage() {
                           key={v.id}
                           titulo={v.titulo}
                           descricao={v.descricao}
-                          link={v.arquivo}
+                          link={`/video/${v.id}`}
                           criado_em={v.criado_em}
-                          onClick={() => router.push(`/video/${v.id}`)}
                           onEdit={() => router.push(`/video/${v.id}`)}
                           thumbnail={v.thumbnail}
                           professor_id={v.professor?.id}
@@ -179,9 +178,8 @@ export default function VideoPage() {
                               key={v.id}
                               titulo={v.titulo}
                               descricao={v.descricao}
-                              link={v.arquivo}
+                              link={`/video/${v.id}`}
                               criado_em={v.criado_em}
-                              onClick={() => router.push(`/video/${v.id}`)}
                               onEdit={() => router.push(`/video/${v.id}`)}
                               thumbnail={v.thumbnail}
                               professor_id={v.professor?.id}

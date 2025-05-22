@@ -25,9 +25,20 @@ export default function VideoUploadModal({ open, onClose, onVideoUploaded, playl
         const formData = new FormData();
         formData.append('titulo', data.titulo);
         formData.append('descricao', data.descricao);
-        formData.append('arquivo', data.videoFile);
+        // Nome customizado do arquivo
+        let fileToSend = data.videoFile;
+        if (data.customFileName) {
+            const ext = fileToSend.name.split('.').pop();
+            const newFile = new File([fileToSend], data.customFileName.endsWith(`.${ext}`) ? data.customFileName : `${data.customFileName}.${ext}`, { type: fileToSend.type });
+            fileToSend = newFile;
+        }
+        formData.append('arquivo', fileToSend);
         if (data.playlists && data.playlists.length > 0) {
             data.playlists.forEach((pl: any) => formData.append('playlists_ids', pl.id));
+        }
+        // Thumbnail
+        if (data.thumbnailFile) {
+            formData.append('thumbnail', data.thumbnailFile);
         }
         try {
             const res = await api.post('videos/', formData, {
@@ -46,7 +57,7 @@ export default function VideoUploadModal({ open, onClose, onVideoUploaded, playl
     if (!open) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-[#00000080] flex items-center justify-center z-50">
             <div className="bg-white rounded-xl shadow-lg w-full max-w-2xl p-0 relative">
                 <button className="absolute top-2 right-2 text-2xl" onClick={() => {
                     setStep(1);

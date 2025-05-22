@@ -20,6 +20,9 @@ export default function VideoForm({ onSubmit, initialData, loading, success, err
     const [titulo, setTitulo] = useState(initialData?.titulo || '');
     const [descricao, setDescricao] = useState(initialData?.descricao || '');
     const [arquivo, setArquivo] = useState<File | null>(null);
+    const [customFileName, setCustomFileName] = useState('');
+    const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+    const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
 
     const [playlists, setPlaylists] = useState<Playlist[]>([]);
     const [playlistsIds, setPlaylistsIds] = useState<number[]>(initialData?.playlistsIds || []);
@@ -28,13 +31,20 @@ export default function VideoForm({ onSubmit, initialData, loading, success, err
     const [playlistLoading, setPlaylistLoading] = useState(false);
     const [playlistError, setPlaylistError] = useState('');
 
-
     useEffect(() => {
         api.get('playlists/', {
             withCredentials: true
         })
             .then(res => setPlaylists(res.data));
     }, []);
+
+    useEffect(() => {
+        if (thumbnailFile) {
+            setThumbnailPreview(URL.createObjectURL(thumbnailFile));
+        } else {
+            setThumbnailPreview(null);
+        }
+    }, [thumbnailFile]);
 
     const handlePlaylistCreate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -65,7 +75,19 @@ export default function VideoForm({ onSubmit, initialData, loading, success, err
         if (editMode) {
             if (arquivo) formData.append('thumbnail', arquivo);
         } else {
-            if (arquivo) formData.append('arquivo', arquivo);
+            // Criação: arquivo de vídeo e thumbnail
+            if (arquivo) {
+                if (customFileName) {
+                    const ext = arquivo.name.split('.').pop();
+                    const newFile = new File([arquivo], customFileName.endsWith(`.${ext}`) ? customFileName : `${customFileName}.${ext}`, { type: arquivo.type });
+                    formData.append('arquivo', newFile);
+                } else {
+                    formData.append('arquivo', arquivo);
+                }
+            }
+            if (thumbnailFile) {
+                formData.append('thumbnail', thumbnailFile);
+            }
         }
         await onSubmit(formData);
     };
@@ -83,10 +105,34 @@ export default function VideoForm({ onSubmit, initialData, loading, success, err
                     )}
                 </div>
             ) : (
-                <div className="mb-4">
-                    <label className="block mb-1 font-semibold text-gray-700">Arquivo de vídeo</label>
-                    <input type="file" accept="video/*" onChange={e => setArquivo(e.target.files?.[0] || null)} required className="w-full mb-2" />
-                </div>
+                <>
+                    <div className="mb-4">
+                        <label className="block mb-1 font-semibold text-gray-700">Arquivo de vídeo</label>
+                        <input type="file" accept="video/*" onChange={e => setArquivo(e.target.files?.[0] || null)} required className="w-full mb-2" />
+                    </div>
+                    <div className="mb-4">
+                        <label className="block mb-1 font-semibold text-gray-700">Nome do arquivo de vídeo (opcional)</label>
+                        <input
+                            type="text"
+                            value={customFileName}
+                            onChange={e => setCustomFileName(e.target.value)}
+                            placeholder="Ex: aula-matematica-01.mp4"
+                            className="w-full mb-2 px-2 py-1 rounded border border-gray-300"
+                        />
+                    </div>
+                    <div className="mb-4">
+                        <label className="block mb-1 font-semibold text-gray-700">Thumbnail (opcional)</label>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={e => setThumbnailFile(e.target.files?.[0] || null)}
+                            className="w-full mb-2"
+                        />
+                        {thumbnailPreview && (
+                            <img src={thumbnailPreview} alt="Prévia da thumbnail" className="w-32 h-20 object-cover rounded mb-2 border" />
+                        )}
+                    </div>
+                </>
             )}
             <div className="mb-4">
                 <label className="block mb-1 font-semibold text-gray-700">Playlists (Cursos)</label>

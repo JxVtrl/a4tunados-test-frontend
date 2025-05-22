@@ -90,9 +90,6 @@ export default function PlaylistProfessorPage() {
                             thumbnail={video.thumbnail}
                             professor_nome={video.professor_nome}
                             professor_id={video.professor}
-                            onClick={() => {
-                                router.push(`/painel/professor/video/${video.id}`)
-                            }}
                         />
                     ))}
                 </div>
