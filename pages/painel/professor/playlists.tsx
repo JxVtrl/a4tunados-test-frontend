@@ -37,24 +37,28 @@ export default function PlaylistsProfessor() {
                     </button>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {playlists.map((playlist) => (
-                        <div
-                            key={playlist.id}
-                            className="p-4 bg-white border border-gray-200 rounded shadow-sm cursor-pointer hover:bg-gray-100 flex flex-col items-center"
-                            onClick={() => router.push(`/painel/professor/playlist/${playlist.id}`)}
-                        >
-                            <Image
-                                src={playlist.foto || "/default_playlist.png"}
-                                alt={playlist.nome}
-                                width={200}
-                                height={200}
-                                className="w-full object-cover rounded mb-2"
-                                style={{ aspectRatio: 1 }}
-                            />
-                            <h3 className="text-lg font-semibold text-gray-900 text-center">{playlist.nome}</h3>
-                            <p className="text-gray-600 text-center">{playlist.descricao}</p>
-                        </div>
-                    ))}
+                    {playlists.map((playlist) => {
+                        console.log(`playlist`, playlist)
+
+                        return (
+                            <div
+                                key={playlist.id}
+                                className="p-4 bg-white border border-gray-200 rounded shadow-sm cursor-pointer hover:bg-gray-100 flex flex-col items-center"
+                                onClick={() => router.push(`/painel/professor/playlist/${playlist.id}`)}
+                            >
+                                <Image
+                                    src={playlist.foto || "/default_playlist.png"}
+                                    alt={playlist.nome}
+                                    width={200}
+                                    height={200}
+                                    className="w-full object-cover rounded mb-2"
+                                    style={{ aspectRatio: 1 }}
+                                />
+                                <h3 className="text-lg font-semibold text-gray-900 text-center">{playlist.nome}</h3>
+                                <p className="text-gray-600 text-center">{playlist.descricao}</p>
+                            </div>
+                        )
+                    })}
                 </div>
                 {isCreatePlaylistModalOpen && (
                     <PlaylistSelectModal
