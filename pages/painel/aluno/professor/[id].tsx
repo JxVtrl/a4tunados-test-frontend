@@ -5,6 +5,7 @@ import Breadcrumb from "@/components/Breadcrumb"
 import api from "@/utils/axiosConfig"
 import { useRouter } from "next/router"
 import VideoCard from "../../../../components/VideoCard"
+import Image from "next/image"
 
 export default function ProfessorAluno() {
     const router = useRouter()
@@ -36,14 +37,12 @@ export default function ProfessorAluno() {
                     {playlists.map((pl) => (
                         <div
                             key={pl.id}
-                            className="bg-white border border-gray-200 rounded shadow-sm p-4 cursor-pointer hover:bg-gray-100 flex flex-col items-center"
+                            className="p-4 bg-white border border-gray-200 rounded shadow-sm cursor-pointer hover:bg-gray-100 flex flex-col items-center"
                             onClick={() => router.push(`/painel/aluno/playlist/${pl.id}`)}
                         >
-                            {pl.foto && (
-                                <img src={pl.foto} alt={pl.nome} className="w-24 h-24 object-cover rounded mb-2" />
-                            )}
-                            <h4 className="font-bold text-lg text-gray-900 mb-1 text-center">{pl.nome}</h4>
-                            <p className="text-gray-600 text-sm text-center">{pl.descricao}</p>
+                            <Image src={pl.foto} alt={pl.nome} width={200} height={200} className="w-full object-cover rounded mb-2" style={{ aspectRatio: 1 }} />
+                            <h3 className="text-lg font-semibold text-gray-900 text-center">{pl.nome}</h3>
+                            <p className="text-gray-600 text-center">{pl.descricao}</p>
                         </div>
                     ))}
                     {playlists.length === 0 && (
