@@ -28,7 +28,7 @@ export default function PlaylistAluno() {
                 <Breadcrumb items={[{ label: "Painel do Aluno", href: "/painel/aluno" }, { label: playlist?.nome || "Playlist" }]} />
                 {playlist && (
                     <div className="flex items-center gap-4 mb-6">
-                        <Image src={playlist.foto} alt={playlist.nome} width={80} height={80} />
+                        <Image src={playlist.foto_url} alt={playlist.nome} width={80} height={80} />
                         <div>
                             <h2 className="text-2xl font-bold mb-1">{playlist.nome}</h2>
                             <p className="text-gray-600">{playlist.descricao}</p>

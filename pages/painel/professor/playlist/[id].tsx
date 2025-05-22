@@ -52,7 +52,7 @@ export default function PlaylistProfessorPage() {
                 />
                 <div className="flex items-center gap-4 mb-4 justify-between">
                     <div className="flex items-center gap-4">
-                        <Image src={playlist?.foto} alt={playlist?.nome} width={80} height={80} />
+                        <Image src={playlist?.foto_url} alt={playlist?.nome} width={80} height={80} />
                         <div>
 
                             <h2 className="text-2xl font-bold mb-1">{playlist?.nome}</h2>

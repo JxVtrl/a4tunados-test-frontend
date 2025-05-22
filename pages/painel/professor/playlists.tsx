@@ -47,7 +47,7 @@ export default function PlaylistsProfessor() {
                                 onClick={() => router.push(`/painel/professor/playlist/${playlist.id}`)}
                             >
                                 <Image
-                                    src={playlist.foto || "/default_playlist.png"}
+                                    src={playlist.foto_url || "/default_playlist.png"}
                                     alt={playlist.nome}
                                     width={200}
                                     height={200}
