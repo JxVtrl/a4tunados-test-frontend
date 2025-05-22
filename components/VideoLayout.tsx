@@ -12,7 +12,7 @@ export default function VideoLayout({ video }: {
     return (
         <div className="flex-1 bg-white rounded-xl shadow p-6">
             <video
-                src={video.arquivo_url.replace(`http://`, `https://`)}
+                src={video.arquivo.replace(`http://`, `https://`)}
                 controls
                 className="w-full rounded mb-4 aspect-video"
                 poster={video.thumbnail}

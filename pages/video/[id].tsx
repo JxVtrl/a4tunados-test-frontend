@@ -16,7 +16,6 @@ export interface Video {
   titulo: string
   descricao: string
   arquivo: string
-  arquivo_url: string
   criado_em: string
   playlists?: { id: number; nome: string }[]
   professor: { id: number; username: string }

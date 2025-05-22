@@ -25,7 +25,7 @@ export default function PlaylistsAluno() {
                             className="p-4 bg-white border border-gray-200 rounded shadow-sm cursor-pointer hover:bg-gray-100 flex flex-col items-center"
                             onClick={() => router.push(`/painel/aluno/playlist/${pl.id}`)}
                         >
-                            <Image src={pl.foto_url} alt={pl.nome} width={200} height={200} className="w-full object-cover rounded mb-2" style={{ aspectRatio: 1 }} />
+                            <Image src={pl.foto} alt={pl.nome} width={200} height={200} className="w-full object-cover rounded mb-2" style={{ aspectRatio: 1 }} />
                             <h3 className="text-lg font-semibold text-gray-900 text-center">{pl.nome}</h3>
                             <p className="text-gray-600 text-center">{pl.descricao}</p>
                         </div>

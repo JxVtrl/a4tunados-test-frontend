@@ -5,7 +5,7 @@ import React, { useState } from "react"
 interface EditPlaylistModalProps {
   open: boolean
   onClose: () => void
-  playlist: { id: number; nome: string; descricao: string; foto?: string; foto_url?: string }
+  playlist: { id: number; nome: string; descricao: string; foto?: string; }
   onSave: () => void
 }
 
@@ -17,7 +17,7 @@ export default function EditPlaylistModal({
 }: EditPlaylistModalProps) {
   const [nome, setNome] = useState(playlist.nome)
   const [descricao, setDescricao] = useState(playlist.descricao)
-  const [foto, setFoto] = useState<File | string | undefined>(playlist?.foto_url)
+  const [foto, setFoto] = useState<File | string | undefined>(playlist?.foto)
 
   const handleSave = async () => {
     try {
@@ -74,9 +74,9 @@ export default function EditPlaylistModal({
         </div>
         <div className="mb-4">
           <label className="block font-semibold text-gray-700">Foto</label>
-          {playlist.foto_url && (
+          {playlist.foto && (
             <Image
-              src={playlist.foto_url || "/default_playlist.png"}
+              src={playlist.foto || "/default_playlist.png"}
               alt="Playlist"
               width={200}
               height={200}
