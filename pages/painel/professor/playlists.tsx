@@ -38,8 +38,6 @@ export default function PlaylistsProfessor() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {playlists.map((playlist) => {
-                        console.log(`playlist`, playlist)
-
                         return (
                             <div
                                 key={playlist.id}
@@ -47,7 +45,7 @@ export default function PlaylistsProfessor() {
                                 onClick={() => router.push(`/painel/professor/playlist/${playlist.id}`)}
                             >
                                 <Image
-                                    src={playlist.foto_url || "/default_playlist.png"}
+                                    src={playlist.foto_url}
                                     alt={playlist.nome}
                                     width={200}
                                     height={200}

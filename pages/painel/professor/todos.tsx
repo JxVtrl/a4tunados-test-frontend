@@ -45,19 +45,23 @@ export default function TodosVideosProfessor() {
                 </div>
                 {loading && <p className="text-center text-gray-600">Carregando...</p>}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {allVideos.map((video) => (
-                        <VideoCard
-                            key={video.id}
-                            titulo={video.titulo}
-                            descricao={video.descricao}
-                            link={`/painel/professor/video/${video.id}`}
-                            criado_em={video.criado_em}
-                            professor_nome={video.professor_nome}
-                            showActions
-                            thumbnail={video.thumbnail}
-                            professor_id={video.professor_id}
-                        />
-                    ))}
+                    {allVideos.map((video) => {
+                        console.log(`video`, video)
+
+                        return (
+                            <VideoCard
+                                key={video.id}
+                                titulo={video.titulo}
+                                descricao={video.descricao}
+                                link={`/painel/professor/video/${video.id}`}
+                                criado_em={video.criado_em}
+                                professor_nome={video.professor_nome}
+                                showActions
+                                thumbnail={video.thumbnail}
+                                professor_id={video.professor_id}
+                            />
+                        )
+                    })}
                     {allVideos.length === 0 && !loading && (
                         <div className="col-span-full text-center text-gray-500">Nenhum vídeo encontrado.</div>
                     )}
