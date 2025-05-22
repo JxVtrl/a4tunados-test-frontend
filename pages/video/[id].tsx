@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react';
 import VideoCard from '@/components/VideoCard';
 import { useAuth } from '@/utils/AuthContext';
 import Breadcrumb from '@/components/Breadcrumb';
+import Navbar from '@/components/Navbar';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 
 interface Video {
@@ -42,7 +44,11 @@ export default function VideoPage() {
                         }
                     })
                         .then(res => res.json())
-                        .then(setPlaylistVideos);
+                        .then(data => {
+                            const filteredVideos = data.filter((item: any) => item.id === id)
+
+                            setPlaylistVideos(filteredVideos)
+                        });
                 }
             });
         // Buscar outros vídeos aleatórios
@@ -52,71 +58,80 @@ export default function VideoPage() {
             }
         })
             .then(res => res.json())
-            .then(setOutrosVideos);
+            .then((data: any) => {
+                console.log(`data`, data)
+                const filteredVideos = data.filter((item: any) => item.id === id)
+                setOutrosVideos(filteredVideos)
+            });
     }, [id]);
 
     if (!video) return <div>Carregando...</div>;
 
     return (
-        <div className="p-8 bg-gray-100 min-h-screen">
-            <Breadcrumb
-                items={[
-                    { label: 'Painel do Aluno', href: '/painel/aluno' },
-                    ...(video?.playlists?.map(pl => ({ label: pl.nome, href: `/painel/aluno?playlist=${pl.id}` })) || []),
-                    { label: video?.titulo || '' }
-                ]}
-                showBack
-            />
-            <div className="flex flex-col md:flex-row gap-8 ">
-                {/* Vídeo principal */}
-                <div className="flex-1 bg-white rounded-xl shadow p-6">
-                    <video src={video.arquivo} controls className="w-full rounded mb-4" />
-                    <h1 className="text-2xl font-bold mb-2">{video.titulo}</h1>
-                    <p className="text-gray-700 mb-2">{video.descricao}</p>
-                    <span className="text-xs text-gray-400">{new Date(video.criado_em).toLocaleString()}</span>
-                </div>
-                {/* Lista lateral */}
-                <div className="w-full md:w-96 flex-shrink-0">
-                    {playlistVideos.length > 0 && (
-                        <>
-                            <h2 className="text-lg font-semibold mb-2">Mais desta playlist</h2>
-                            <ul>
-                                {playlistVideos
-                                    .filter(v => v.id !== video.id)
-                                    .map(v => (
-                                        <VideoCard
-                                            key={v.id}
-                                            id={v.id}
-                                            titulo={v.titulo}
-                                            descricao={v.descricao}
-                                            link={v.arquivo}
-                                            criado_em={v.criado_em}
-                                            // Ao clicar, navega para o vídeo
-                                            onEdit={() => router.push(`/video/${v.id}`)}
-                                        />
-                                    ))}
-                            </ul>
-                        </>
-                    )}
-                    <h2 className="text-lg font-semibold mt-6 mb-2">Outros vídeos</h2>
-                    <ul>
-                        {outrosVideos
-                            .filter(v => v.id !== video.id && (!playlistVideos.length || !playlistVideos.some(pv => pv.id === v.id)))
-                            .slice(0, 8)
-                            .map(v => (
-                                <VideoCard
-                                    key={v.id}
-                                    id={v.id}
-                                    titulo={v.titulo}
-                                    descricao={v.descricao}
-                                    link={v.arquivo}
-                                    criado_em={v.criado_em}
-                                    onEdit={() => router.push(`/video/${v.id}`)}
-                                />
-                            ))}
-                    </ul>
+        <ProtectedRoute allowedTypes={[`aluno`]}>
+            <Navbar />
+            <div className="p-8 bg-gray-100 min-h-screen">
+                <Breadcrumb
+                    items={[
+                        { label: 'Painel do Aluno', href: '/painel/aluno' },
+                        ...(video?.playlists?.map(pl => ({ label: pl.nome, href: `/painel/aluno?playlist=${pl.id}` })) || []),
+                        { label: video?.titulo || '' }
+                    ]}
+                    showBack
+                />
+                <div className="flex flex-col md:flex-row gap-8 ">
+                    {/* Vídeo principal */}
+                    <div className="flex-1 bg-white rounded-xl shadow p-6">
+                        <video src={video.arquivo} controls className="w-full rounded mb-4" />
+                        <h1 className="text-2xl font-bold mb-2">{video.titulo}</h1>
+                        <p className="text-gray-700 mb-2">{video.descricao}</p>
+                        <span className="text-xs text-gray-400">{new Date(video.criado_em).toLocaleString()}</span>
+                    </div>
+                    {playlistVideos.length === 0 && outrosVideos.length === 0 || <div className="w-full md:w-96 flex-shrink-0">
+                        {playlistVideos.length > 0 && (
+                            <>
+                                <h2 className="text-lg font-semibold mb-2">Mais desta playlist</h2>
+                                <ul>
+                                    {playlistVideos
+                                        .map(v => (
+                                            <VideoCard
+                                                key={v.id}
+                                                id={v.id}
+                                                titulo={v.titulo}
+                                                descricao={v.descricao}
+                                                link={v.arquivo}
+                                                criado_em={v.criado_em}
+                                                onEdit={() => router.push(`/video/${v.id}`)}
+                                            />
+                                        ))}
+                                </ul>
+                            </>
+                        )}
+                        {outrosVideos.length > 0 && (
+                            <>
+                                <h2 className="text-lg font-semibold mt-6 mb-2">Outros vídeos</h2>
+                                <ul>
+                                    {outrosVideos.filter(v => v.id !== video.id && (!playlistVideos.length || !playlistVideos.some(pv => pv.id === v.id)))
+                                        .slice(0, 8)
+                                        .map(v => (
+                                            <VideoCard
+                                                key={v.id}
+                                                id={v.id}
+                                                titulo={v.titulo}
+                                                descricao={v.descricao}
+                                                link={v.arquivo}
+                                                criado_em={v.criado_em}
+                                                onEdit={() => router.push(`/video/${v.id}`)}
+                                            />
+                                        ))}
+                                </ul>
+                            </>
+                        )}
+                    </div>}
+
                 </div>
             </div>
-        </div>
+        </ProtectedRoute>
+
     );
 }

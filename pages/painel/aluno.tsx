@@ -1,12 +1,13 @@
 // frontend/pages/painel/aluno.tsx
 
-import { useEffect, useState, useMemo } from 'react'; // Importar useMemo
+import { useEffect, useState, useMemo } from 'react';
 import { useAuth } from '../../utils/AuthContext';
 import ProtectedRoute from '../../components/ProtectedRoute';
 import Navbar from '../../components/Navbar';
 import VideoCard from '../../components/VideoCard';
 import PlaylistCard from '@/components/PlaylistCard';
 import { useRouter } from 'next/router';
+import Breadcrumb from '@/components/Breadcrumb'; // Importar o componente Breadcrumb
 
 
 interface Playlist {
@@ -25,7 +26,7 @@ interface Video {
     criado_em: string;
     playlists?: Playlist[];
     professor: Professor;
-    duracao?: number; // Adicionei duração ao tipo Video para ordenação
+    duracao?: number;
 }
 
 export default function PainelAluno() {
@@ -33,19 +34,18 @@ export default function PainelAluno() {
     const router = useRouter();
     const { playlist: playlistIdQuery } = router.query;
 
-    const [allVideos, setAllVideos] = useState<Video[]>([]); // Todos os vídeos
-    const [playlists, setPlaylists] = useState<Playlist[]>([]); // Para o filtro de playlist
-    const [playlistSelecionada, setPlaylistSelecionada] = useState<Playlist | null>(null); // Playlist específica se navegou por ela
+    const [allVideos, setAllVideos] = useState<Video[]>([]);
+    const [playlists, setPlaylists] = useState<Playlist[]>([]);
+    const [playlistSelecionada, setPlaylistSelecionada] = useState<Playlist | null>(null);
     const [loading, setLoading] = useState(false);
-    const [searchTerm, setSearchTerm] = useState(''); // Estado para busca
-    const [filterPlaylistId, setFilterPlaylistId] = useState(''); // Estado para filtro de playlist
-    const [sortOption, setSortOption] = useState('criado_em'); // Estado para ordenação
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filterPlaylistId, setFilterPlaylistId] = useState('');
+    const [sortOption, setSortOption] = useState('criado_em');
 
     useEffect(() => {
         if (!token) return;
         setLoading(true);
 
-        // Sempre buscar todas as playlists para o filtro
         fetch('http://localhost:8000/api/playlists/', {
             headers: { Authorization: `Bearer ${token}` }
         })
@@ -53,7 +53,6 @@ export default function PainelAluno() {
             .then(data => setPlaylists(data))
             .catch(() => setPlaylists([]));
 
-        // Verificar se há um playlistId na URL para exibir vídeos de uma playlist específica
         if (playlistIdQuery) {
             const id = Number(playlistIdQuery);
             fetch(`http://localhost:8000/api/playlists/${id}/`, {
@@ -61,20 +60,19 @@ export default function PainelAluno() {
             })
                 .then(res => {
                     if (!res.ok) {
-                        router.push('/painel/aluno'); // Redirecionar se não encontrar
+                        router.push('/painel/aluno');
                         throw new Error('Playlist not found');
                     }
                     return res.json();
                 })
                 .then(playlistData => {
                     setPlaylistSelecionada(playlistData);
-                    // Buscar os vídeos dessa playlist específica
                     fetch(`http://localhost:8000/api/playlists/${id}/videos/`, {
                         headers: { Authorization: `Bearer ${token}` }
                     })
                         .then(res => res.json())
                         .then(videoData => {
-                            setAllVideos(videoData); // Usar setAllVideos mesmo para playlist específica
+                            setAllVideos(videoData);
                             setLoading(false);
                         })
                         .catch(() => {
@@ -88,8 +86,7 @@ export default function PainelAluno() {
                 });
 
         } else {
-            // Se não tem playlistId na URL, buscar todos os vídeos por padrão
-            setPlaylistSelecionada(null); // Garantir que não estamos no modo playlist específica
+            setPlaylistSelecionada(null);
             fetch('http://localhost:8000/api/videos/', {
                 headers: { Authorization: `Bearer ${token}` }
             })
@@ -97,21 +94,17 @@ export default function PainelAluno() {
                 .then(data => setAllVideos(data))
                 .finally(() => setLoading(false));
         }
-    }, [token, playlistIdQuery, router]); // Adicionar dependências
+    }, [token, playlistIdQuery, router]);
 
-    // Lógica de filtragem, busca e ordenação usando useMemo para performance
     const filteredAndSortedVideos = useMemo(() => {
         let videosToShow = [...allVideos];
 
-        // 1. Filtrar por Playlist (se playlistIdQuery está na URL, já carregamos só os dela)
-        //    Se não, e se filterPlaylistId está selecionado, filtramos aqui
         if (!playlistIdQuery && filterPlaylistId) {
             videosToShow = videosToShow.filter(video =>
                 video.playlists?.some(p => p.id === Number(filterPlaylistId))
             );
         }
 
-        // 2. Buscar por termo
         if (searchTerm) {
             videosToShow = videosToShow.filter(video =>
                 video.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -119,20 +112,19 @@ export default function PainelAluno() {
             );
         }
 
-        // 3. Ordenar
         videosToShow.sort((a, b) => {
             if (sortOption === 'titulo') {
                 return a.titulo.localeCompare(b.titulo);
             } else if (sortOption === 'criado_em') {
-                return new Date(b.criado_em).getTime() - new Date(a.criado_em).getTime(); // Mais recentes primeiro
+                return new Date(b.criado_em).getTime() - new Date(a.criado_em).getTime();
             } else if (sortOption === 'duracao' && a.duracao && b.duracao) {
-                return a.duracao - b.duracao; // Menor duração primeiro (ou b.duracao - a.duracao para maior)
+                return a.duracao - b.duracao;
             }
-            return 0; // Manter ordem original se não houver critério
+            return 0;
         });
 
         return videosToShow;
-    }, [allVideos, searchTerm, filterPlaylistId, sortOption, playlistIdQuery]); // Adicionar dependências
+    }, [allVideos, searchTerm, filterPlaylistId, sortOption, playlistIdQuery]);
 
     const handlePlaylistClickInCard = (playlistId: number) => {
         router.push(`/painel/aluno?playlist=${playlistId}`);
@@ -141,80 +133,86 @@ export default function PainelAluno() {
     return (
         <ProtectedRoute allowedTypes={['aluno']}>
             <Navbar />
-            <div className="min-h-screen bg-gray-100 flex flex-col items-center py-8">
-                <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-5xl mb-8">
-                    {/* Breadcrumb */}
-                    {playlistSelecionada && (
-                        <button onClick={() => router.push('/painel/aluno')} className="mb-4 px-4 py-2 bg-gray-200 rounded">Voltar para Todos os Vídeos</button>
-                    )}
+            <div className="p-8 bg-gray-100 min-h-screen">
+                {/* Usar Breadcrumb quando uma playlist estiver selecionada */}
+                {playlistSelecionada ? (
+                    <Breadcrumb
+                        items={[
+                            { label: 'Painel do Aluno', href: '/painel/aluno' },
+                            { label: playlistSelecionada.nome } // Nome da playlist selecionada sem link (item ativo)
+                        ]}
+                        showBack={false} // Não mostrar botão de voltar no Breadcrumb, pois o link "Painel do Aluno" já faz isso
+                    />
+                ) : (
+                    // Mostrar o título "Playlists Disponíveis" ou "Todos os Vídeos" quando nenhuma playlist estiver selecionada
+                    <h2 className="text-2xl font-bold mb-6 text-center">Playlists Disponíveis</h2> // Manter este título para a view inicial de playlists
+                )}
 
-                    <h2 className="text-2xl font-bold mb-6 text-center">
-                        {playlistSelecionada ? `Vídeos da Playlist: ${playlistSelecionada.nome}` : 'Todos os Vídeos'}
-                    </h2>
+                <h2 className="text-2xl font-bold mb-6 text-center">
+                    {/* O título principal agora depende se há uma playlist selecionada ou não */}
+                    {!playlistSelecionada ? 'Todos os Vídeos' : `Vídeos da Playlist: ${playlistSelecionada.nome}`}
+                </h2>
 
-                    {/* Controles de Busca, Filtro e Ordenação (Mostrar apenas na lista geral de vídeos) */}
-                    {!playlistSelecionada && (
-                        <div className="flex flex-col md:flex-row gap-4 mb-6 w-full">
-                            <input
-                                type="text"
-                                placeholder="Buscar vídeos..."
-                                className="px-3 py-2 border rounded shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 w-full"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
-                            <div className='flex flex-row gap-2'>
-                                <select
-                                    className="py-2 border rounded shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 w-full md:min-w-[250px]"
-                                    value={filterPlaylistId}
-                                    onChange={(e) => setFilterPlaylistId(e.target.value)}
-                                >
-                                    <option value="">Todas as Playlists</option>
-                                    {playlists.map(pl => (
-                                        <option key={pl.id} value={pl.id}>{pl.nome}</option>
-                                    ))}
-                                </select>
-                                <select
-                                    className="py-2 border rounded shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 w-full md:min-w-[250px]"
-                                    value={sortOption}
-                                    onChange={(e) => setSortOption(e.target.value)}
-                                >
-                                    <option value="criado_em">Ordenar por Data</option>
-                                    <option value="titulo">Ordenar por Nome</option>
-                                    {/* Adicione "duracao" como opção de ordenação se tiver o dado no backend */}
-                                    {/* <option value="duracao">Ordenar por Duração</option> */}
-                                </select>
-                            </div>
 
+                {/* Controles de Busca, Filtro e Ordenação (Mostrar apenas na lista geral de vídeos) */}
+                {!playlistSelecionada && (
+                    <div className="flex flex-col md:flex-row gap-4 mb-6 w-full">
+                        <input
+                            type="text"
+                            placeholder="Buscar vídeos..."
+                            className="px-3 py-2 border rounded shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 w-full"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                        <div className='flex flex-row gap-2'>
+                            <select
+                                className="py-2 border rounded shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 w-full md:min-w-[250px]"
+                                value={filterPlaylistId}
+                                onChange={(e) => setFilterPlaylistId(e.target.value)}
+                            >
+                                <option value="">Todas as Playlists</option>
+                                {playlists.map(pl => (
+                                    <option key={pl.id} value={pl.id}>{pl.nome}</option>
+                                ))}
+                            </select>
+                            <select
+                                className="py-2 border rounded shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 w-full md:min-w-[250px]"
+                                value={sortOption}
+                                onChange={(e) => setSortOption(e.target.value)}
+                            >
+                                <option value="criado_em">Ordenar por Data</option>
+                                <option value="titulo">Ordenar por Nome</option>
+                                {/* Adicione "duracao" como opção de ordenação se tiver o dado no backend */}
+                            </select>
                         </div>
-                    )}
+
+                    </div>
+                )}
 
 
-                    {loading && <p className="text-center">Carregando vídeos...</p>}
+                {loading && <p className="text-center">Carregando vídeos...</p>}
 
-                    <h3 className="text-lg font-semibold mb-4">
-                        {playlistSelecionada ? `(${filteredAndSortedVideos.length} vídeos)` : `Vídeos Disponíveis (${filteredAndSortedVideos.length})`}
-                    </h3>
+                <h3 className="text-lg font-semibold mb-4">
+                    {playlistSelecionada ? `(${filteredAndSortedVideos.length} vídeos)` : `Vídeos Disponíveis (${filteredAndSortedVideos.length})`}
+                </h3>
 
-                    {/* Lista de Vídeos */}
-                    <ul>
-                        {filteredAndSortedVideos.map(video => (
-                            <VideoCard
-                                key={video.id}
-                                id={video.id}
-                                titulo={video.titulo}
-                                descricao={video.descricao}
-                                link={video.arquivo}
-                                criado_em={video.criado_em}
-                                playlists={video.playlists} // Passar as playlists para o VideoCard
-                                // Ao clicar no card do vídeo, navegar para a página de vídeo
-                                onClick={() => router.push(`/video/${video.id}`)}
-                                // Passar a função para lidar com o clique na playlist dentro do card
-                                onPlaylistClick={handlePlaylistClickInCard}
-                            />
-                        ))}
-                    </ul>
+                {/* Lista de Vídeos */}
+                <ul>
+                    {filteredAndSortedVideos.map(video => (
+                        <VideoCard
+                            key={video.id}
+                            id={video.id}
+                            titulo={video.titulo}
+                            descricao={video.descricao}
+                            link={video.arquivo}
+                            criado_em={video.criado_em}
+                            playlists={video.playlists}
+                            onClick={() => router.push(`/video/${video.id}`)}
+                            onPlaylistClick={handlePlaylistClickInCard}
+                        />
+                    ))}
+                </ul>
 
-                </div>
             </div>
         </ProtectedRoute>
     );
