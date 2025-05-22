@@ -8,6 +8,7 @@ import Breadcrumb from "@/components/Breadcrumb"
 import Navbar from "@/components/Navbar"
 import ProtectedRoute from "@/components/ProtectedRoute"
 import api from "@/utils/axiosConfig"
+import Avatar from "@/components/Avatar"
 
 interface Video {
   id: number
@@ -17,6 +18,8 @@ interface Video {
   criado_em: string
   playlists?: { id: number; nome: string }[]
   professor?: { id: number; username: string }
+  professor_nome?: string
+  thumbnail?: string
 }
 export default function VideoPage() {
   const router = useRouter()
@@ -85,48 +88,49 @@ export default function VideoPage() {
               className="w-full rounded mb-4"
             />
             <h1 className="text-2xl font-bold mb-2">{video.titulo}</h1>
+            {/* Avatar e nome do professor */}
+            <div
+              className="flex items-center gap-2 mb-2 cursor-pointer hover:opacity-80"
+              onClick={() => {
+                if (video.professor || video.professor_nome) {
+                  router.push({
+                    pathname: '/painel/aluno',
+                    query: {
+                      professorId: video.professor?.id,
+                      professorNome: video.professor_nome || video.professor?.username
+                    }
+                  })
+                }
+              }}
+            >
+              <Avatar
+                name={video.professor_nome || video.professor?.username || "?"}
+                size="40px"
+                onClick={() => { }}
+              />
+              <span className="text-gray-700 font-medium">
+                {video.professor_nome || video.professor?.username}
+              </span>
+            </div>
             <p className="text-gray-700 mb-2">{video.descricao}</p>
             <span className="text-xs text-gray-400">
               {new Date(video.criado_em).toLocaleString()}
             </span>
           </div>
-          {(playlistVideos.length === 0 && outrosVideos.length === 0) || (
-            <div className="w-full md:w-96 flex-shrink-0">
-              {playlistVideos.length > 0 && (
-                <>
-                  <h2 className="text-lg font-semibold mb-2">
-                    Mais desta playlist
-                  </h2>
-                  <ul>
-                    {playlistVideos.map((v) => (
-                      <VideoCard
-                        key={v.id}
-                        titulo={v.titulo}
-                        descricao={v.descricao}
-                        link={v.arquivo}
-                        criado_em={v.criado_em}
-                        onClick={() => router.push(`/video/${v.id}`)}
-                        onEdit={() => router.push(`/video/${v.id}`)}
-                      />
-                    ))}
-                  </ul>
-                </>
-              )}
-              {outrosVideos.length > 0 && (
-                <>
-                  <h2 className="text-lg font-semibold mt-6 mb-2">
-                    Outros vídeos
-                  </h2>
-                  <ul>
-                    {outrosVideos
-                      .filter(
-                        (v) =>
-                          v.id !== video.id &&
-                          (!playlistVideos.length ||
-                            !playlistVideos.some((pv) => pv.id === v.id))
-                      )
-                      .slice(0, 8)
-                      .map((v) => (
+          {(playlistVideos.length === 0 && outrosVideos.filter(
+            (v) =>
+              v.id !== video.id &&
+              (!playlistVideos.length ||
+                !playlistVideos.some((pv) => pv.id === v.id))
+          ).length === 0) || (
+              <div className="w-full md:w-96 flex-shrink-0">
+                {playlistVideos.length > 0 && (
+                  <>
+                    <h2 className="text-lg font-semibold mb-2">
+                      Mais desta playlist
+                    </h2>
+                    <ul>
+                      {playlistVideos.map((v) => (
                         <VideoCard
                           key={v.id}
                           titulo={v.titulo}
@@ -135,13 +139,50 @@ export default function VideoPage() {
                           criado_em={v.criado_em}
                           onClick={() => router.push(`/video/${v.id}`)}
                           onEdit={() => router.push(`/video/${v.id}`)}
+                          thumbnail={v.thumbnail}
+                          professor_id={v.professor?.id}
                         />
                       ))}
-                  </ul>
-                </>
-              )}
-            </div>
-          )}
+                    </ul>
+                  </>
+                )}
+                {outrosVideos.filter(
+                  (v) =>
+                    v.id !== video.id &&
+                    (!playlistVideos.length ||
+                      !playlistVideos.some((pv) => pv.id === v.id))
+                ).length > 0 && (
+                    <>
+                      <h2 className="text-lg font-semibold mt-6 mb-2">
+                        Outros vídeos
+                      </h2>
+                      <ul>
+                        {outrosVideos
+                          .filter(
+                            (v) =>
+                              v.id !== video.id &&
+                              (!playlistVideos.length ||
+                                !playlistVideos.some((pv) => pv.id === v.id))
+                          )
+                          .slice(0, 8)
+                          .map((v) => (
+                            <VideoCard
+                              key={v.id}
+                              titulo={v.titulo}
+                              descricao={v.descricao}
+                              link={v.arquivo}
+                              criado_em={v.criado_em}
+                              onClick={() => router.push(`/video/${v.id}`)}
+                              onEdit={() => router.push(`/video/${v.id}`)}
+                              thumbnail={v.thumbnail}
+                              professor_id={v.professor?.id}
+                            />
+                          ))}
+                      </ul>
+                    </>
+                  )}
+              </div>
+            )}
         </div>
       </div>
     </ProtectedRoute>
