@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../utils/AuthContext';
+import api from '@/utils/axiosConfig';
 
 export default function Register() {
     const [username, setUsername] = useState('');
@@ -32,11 +33,7 @@ export default function Register() {
         e.preventDefault();
         setError('');
         try {
-            await fetch('http://localhost:8081/api/register/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, email, password, tipo })
-            });
+            await api.post('register/', { username, email, password, tipo });
             router.push('/login');
         } catch (err: any) {
             setError('Erro ao cadastrar. Tente outro usuário.');
