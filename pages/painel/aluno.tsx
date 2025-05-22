@@ -135,7 +135,7 @@ export default function PainelAluno() {
             <Navbar />
             <div className="p-8 bg-gray-100 min-h-screen">
                 {/* Usar Breadcrumb quando uma playlist estiver selecionada */}
-                {playlistSelecionada ? (
+                {playlistSelecionada && (
                     <Breadcrumb
                         items={[
                             { label: 'Painel do Aluno', href: '/painel/aluno' },
@@ -143,14 +143,11 @@ export default function PainelAluno() {
                         ]}
                         showBack={false} // Não mostrar botão de voltar no Breadcrumb, pois o link "Painel do Aluno" já faz isso
                     />
-                ) : (
-                    // Mostrar o título "Playlists Disponíveis" ou "Todos os Vídeos" quando nenhuma playlist estiver selecionada
-                    <h2 className="text-2xl font-bold mb-6 text-center">Playlists Disponíveis</h2> // Manter este título para a view inicial de playlists
                 )}
 
                 <h2 className="text-2xl font-bold mb-6 text-center">
                     {/* O título principal agora depende se há uma playlist selecionada ou não */}
-                    {!playlistSelecionada ? 'Todos os Vídeos' : `Vídeos da Playlist: ${playlistSelecionada.nome}`}
+                    {!playlistSelecionada ? 'Todos os Vídeos' : `${playlistSelecionada.nome} - (${filteredAndSortedVideos.length} vídeos)`}
                 </h2>
 
 
@@ -191,10 +188,6 @@ export default function PainelAluno() {
 
 
                 {loading && <p className="text-center">Carregando vídeos...</p>}
-
-                <h3 className="text-lg font-semibold mb-4">
-                    {playlistSelecionada ? `(${filteredAndSortedVideos.length} vídeos)` : `Vídeos Disponíveis (${filteredAndSortedVideos.length})`}
-                </h3>
 
                 {/* Lista de Vídeos */}
                 <ul>
