@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/router';
 import React from 'react';
+import Avatar from './Avatar';
 
 interface Playlist { // Definir a interface Playlist aqui ou importar
     id: number;
@@ -21,13 +22,7 @@ interface VideoCardProps {
     id: number;
     onClick?: () => void; // Clique no card inteiro
     onPlaylistClick?: (playlistId: number) => void; // Clique em uma playlist dentro do card
-}
-
-function formatDuration(seconds: number) {
-    if (isNaN(seconds) || seconds === null) return '';
-    const min = Math.floor(seconds / 60);
-    const sec = Math.floor(seconds % 60);
-    return `${min}:${sec.toString().padStart(2, '0')}`;
+    professor_nome: string; 
 }
 
 export default function VideoCard({
@@ -42,7 +37,8 @@ export default function VideoCard({
     duracao,
     id,
     onClick,
-    onPlaylistClick // Receber a nova prop
+    onPlaylistClick, // Receber a nova prop
+    professor_nome,
 }: VideoCardProps) {
     const isArquivo = link && (link.startsWith('/media/') || link.startsWith('http://localhost:8000/media/') || link.match(/\.(mp4|webm|ogg)$/i));
 
@@ -56,13 +52,19 @@ export default function VideoCard({
             onClick();
         }
     };
+    
+    const handleAvatarClick = (e: React.MouseEvent) => {
+        e.stopPropagation(); 
+    };
 
 
     return (
-        <li className=" border-b border-gray-200 bg-white hover:bg-gray-50 transition cursor-pointer p-3"
+        <li className=" border-b border-gray-200  hover:bg-gray-50 transition cursor-pointer list-none"
         >
-            <div onClick={handleCardClick} className="flex items-center gap-4">
-                <div className="w-32 h-20 flex-shrink-0 bg-black rounded overflow-hidden flex items-center justify-center">
+            <div onClick={handleCardClick} className="flex flex-col items-center gap-4">
+                <div className="w-full  flex-shrink-0 bg-black rounded overflow-hidden flex  items-center justify-center" style={{
+                    aspectRatio: `16/9`
+                }}>
                     {isArquivo ? (
                         <video
                             src={link}
@@ -80,39 +82,48 @@ export default function VideoCard({
                         </span>
                     )}
                 </div>
-                <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                        <strong className="text-base truncate">{titulo}</strong>
+                <div className="w-full">
+                    <Avatar imageUrl='' name={professor_nome} onClick={handleAvatarClick} />
+
+
+                    <div>
+                        <div className="flex items-center gap-2">
+                            <strong className="text-base truncate">{titulo}</strong>
+                        </div>
+                        <span className="block text-gray-600 text-sm truncate mb-1">{descricao}</span> {/* Adicionado mb-1 */}
+                        {criado_em && (
+                            <span className="block text-xs text-gray-400 mb-1">{new Date(criado_em).toLocaleString()}</span>
+                        )}
+                          {professor_nome && ( 
+                            <span className="block text-xs text-gray-500">Professor: {professor_nome}</span>
+                        )}
+                        {playlists && playlists.length > 0 && (
+                            <div className="text-xs text-green-700 flex items-center flex-wrap gap-1"> {/* Usar div para flex-wrap */}
+                                Playlists:
+                                {playlists.map((p, index) => (
+                                    <React.Fragment key={p.id}>
+                                        {index > 0 && <span>, </span>} {/* Separador entre playlists */}
+                                        <button // Usar button para ser clicável
+                                            onClick={(e) => {
+                                                e.stopPropagation(); // Evita que o clique suba para o card
+                                                if (onPlaylistClick) onPlaylistClick(p.id);
+                                            }}
+                                            className="underline hover:no-underline text-green-800" // Estilo de link
+                                        >
+                                            {p.nome}
+                                        </button>
+                                    </React.Fragment>
+                                ))}
+                            </div>
+                        )}
+                        {showActions && (
+                            <div className="flex gap-2 mt-2">
+                                {onEdit && <button onClick={onEdit} className="flex-1 py-1 rounded bg-yellow-400 text-black font-semibold hover:bg-yellow-500 transition">Editar</button>}
+                                {onDelete && <button onClick={onDelete} className="flex-1 py-1 rounded bg-red-600 text-white font-semibold hover:bg-red-700 transition">Excluir</button>}
+                            </div>
+                        )}
+
                     </div>
-                    <span className="block text-gray-600 text-sm truncate mb-1">{descricao}</span> {/* Adicionado mb-1 */}
-                    {criado_em && (
-                        <span className="block text-xs text-gray-400 mb-1">{new Date(criado_em).toLocaleString()}</span>
-                    )}
-                    {playlists && playlists.length > 0 && (
-                        <div className="text-xs text-green-700 flex items-center flex-wrap gap-1"> {/* Usar div para flex-wrap */}
-                            Playlists:
-                            {playlists.map((p, index) => (
-                                <React.Fragment key={p.id}>
-                                    {index > 0 && <span>, </span>} {/* Separador entre playlists */}
-                                    <button // Usar button para ser clicável
-                                        onClick={(e) => {
-                                            e.stopPropagation(); // Evita que o clique suba para o card
-                                            if (onPlaylistClick) onPlaylistClick(p.id);
-                                        }}
-                                        className="underline hover:no-underline text-green-800" // Estilo de link
-                                    >
-                                        {p.nome}
-                                    </button>
-                                </React.Fragment>
-                            ))}
-                        </div>
-                    )}
-                    {showActions && (
-                        <div className="flex gap-2 mt-2">
-                            {onEdit && <button onClick={onEdit} className="flex-1 py-1 rounded bg-yellow-400 text-black font-semibold hover:bg-yellow-500 transition">Editar</button>}
-                            {onDelete && <button onClick={onDelete} className="flex-1 py-1 rounded bg-red-600 text-white font-semibold hover:bg-red-700 transition">Excluir</button>}
-                        </div>
-                    )}
                 </div>
             </div>
 

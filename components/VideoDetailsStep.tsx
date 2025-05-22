@@ -15,8 +15,8 @@ export default function VideoDetailsStep({ videoFile, onBack, onSubmit }: { vide
         onSubmit({ titulo, descricao, playlists, videoFile });
     };
 
-    const buscarPlaylists = () => {
-        fetch('http://localhost:8000/api/playlists/', {
+    const buscarPlaylists = async () => {
+        await fetch('http://localhost:8000/api/playlists/', {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(res => res.json())
@@ -69,11 +69,9 @@ export default function VideoDetailsStep({ videoFile, onBack, onSubmit }: { vide
             </div>
             {showPlaylistModal && (
                 <PlaylistSelectModal
-                    selected={playlists}
-                    onSelect={setPlaylists}
                     onClose={() => {
-                        setShowPlaylistModal(false)
                         buscarPlaylists()
+                        setShowPlaylistModal(false)
                     }}
                 />
             )}

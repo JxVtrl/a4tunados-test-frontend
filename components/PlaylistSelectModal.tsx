@@ -2,7 +2,7 @@
 import { useAuth } from '@/utils/AuthContext';
 import React, { useEffect, useState } from 'react';
 
-export default function PlaylistSelectModal({ selected, onSelect, onClose }: { selected: any[], onSelect: (playlists: any[]) => void, onClose: () => void }) {
+export default function PlaylistSelectModal({ onClose }: { onClose: () => void }) {
     const [playlists, setPlaylists] = useState<any[]>([]);
     const [nova, setNova] = useState('');
     const [novaDescricao, setNovaDescricao] = useState('');
@@ -19,7 +19,7 @@ export default function PlaylistSelectModal({ selected, onSelect, onClose }: { s
             .then(data => setPlaylists(data));
     }, []);
 
-    const handleCriar = () => {
+    const handleCriar =  async () => {
         if (nova === '') {
             alert('O nome da playlist é obrigatório');
             return;
@@ -47,7 +47,7 @@ export default function PlaylistSelectModal({ selected, onSelect, onClose }: { s
 
 
 
-        fetch('http://localhost:8000/api/playlists/', {
+        await fetch('http://localhost:8000/api/playlists/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -82,9 +82,6 @@ export default function PlaylistSelectModal({ selected, onSelect, onClose }: { s
                         onChange={e => setNovaDescricao(e.target.value)}
                     />
                     <button className="bg-blue-600 text-white px-3 py-1 rounded" onClick={handleCriar}>Criar playlist</button>
-                </div>
-                <div className="flex justify-end mt-4">
-                    <button className="px-4 py-2 bg-gray-200 rounded" onClick={onClose}>Concluído</button>
                 </div>
             </div>
         </div>
