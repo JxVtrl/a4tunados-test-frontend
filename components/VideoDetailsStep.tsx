@@ -19,9 +19,15 @@ export default function VideoDetailsStep({ videoFile, onBack, onSubmit, playlist
     const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
     const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
     const [customFileName, setCustomFileName] = useState('');
+    const [error, setError] = useState<string | null>(null);
     const fileExtension = videoFile.name.split('.').pop() || '';
 
     const handleSave = () => {
+        if (!thumbnailFile) {
+            setError('Selecione uma thumbnail para o vídeo.');
+            return;
+        }
+        setError(null);
         let finalFileName = customFileName.trim();
         if (finalFileName && !finalFileName.endsWith(`.${fileExtension}`)) {
             finalFileName = `${finalFileName}.${fileExtension}`;
@@ -85,7 +91,7 @@ export default function VideoDetailsStep({ videoFile, onBack, onSubmit, playlist
                 </div>
             </div>
             <div className="mb-4">
-                <label className="block font-semibold">Thumbnail (opcional)</label>
+                <label className="block font-semibold">Thumbnail <span className="text-red-600">*</span></label>
                 <input
                     type="file"
                     accept="image/*"
@@ -94,6 +100,9 @@ export default function VideoDetailsStep({ videoFile, onBack, onSubmit, playlist
                 />
                 {thumbnailPreview && (
                     <img src={thumbnailPreview} alt="Prévia da thumbnail" className="w-32 h-20 object-cover rounded mb-2 border mt-2" />
+                )}
+                {error && (
+                    <p className="text-red-600 text-sm mt-1">{error}</p>
                 )}
             </div>
             <div className="mb-4">
