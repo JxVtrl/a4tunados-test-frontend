@@ -1,4 +1,3 @@
-
 import api from "@/utils/axiosConfig"
 import Image from "next/image"
 import React, { useState } from "react"
@@ -52,29 +51,29 @@ export default function EditPlaylistModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-lg w-full max-w-lg p-6 relative">
-        <button className="absolute top-2 right-2 text-2xl" onClick={onClose}>
+      <div className="bg-white rounded-xl shadow-lg w-full max-w-lg p-6 relative border border-gray-200">
+        <button className="absolute top-2 right-2 text-2xl text-gray-400 hover:text-gray-700" onClick={onClose}>
           ×
         </button>
-        <h2 className="text-xl font-bold mb-4">Editar Playlist</h2>
+        <h2 className="text-xl font-bold mb-4 text-gray-900">Editar Playlist</h2>
         <div className="mb-4">
-          <label className="block font-semibold">Nome</label>
+          <label className="block font-semibold text-gray-700">Nome</label>
           <input
-            className="w-full border rounded px-2 py-1"
+            className="w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-gray-700"
             value={nome}
             onChange={(e) => setNome(e.target.value)}
           />
         </div>
         <div className="mb-4">
-          <label className="block font-semibold">Descrição</label>
+          <label className="block font-semibold text-gray-700">Descrição</label>
           <textarea
-            className="w-full border rounded px-2 py-1"
+            className="w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-gray-700"
             value={descricao}
             onChange={(e) => setDescricao(e.target.value)}
           />
         </div>
         <div className="mb-4">
-          <label className="block font-semibold">Foto</label>
+          <label className="block font-semibold text-gray-700">Foto</label>
           {playlist.foto && (
             <Image
               src={playlist.foto || "/default_playlist.png"}
@@ -87,17 +86,18 @@ export default function EditPlaylistModal({
           <input
             type="file"
             accept="image/*"
+            className="mt-2"
             onChange={(e) =>
               setFoto(e.target.files ? e.target.files[0] : undefined)
             }
           />
         </div>
         <div className="flex justify-end gap-2">
-          <button className="px-4 py-2 bg-gray-200 rounded" onClick={onClose}>
+          <button className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition" onClick={onClose}>
             Cancelar
           </button>
           <button
-            className="px-4 py-2 bg-blue-600 text-white rounded"
+            className="px-4 py-2 bg-gray-800 text-white rounded shadow-sm hover:bg-gray-700 transition"
             onClick={handleSave}
           >
             Salvar

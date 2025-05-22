@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import api from '@/utils/axiosConfig';
 
@@ -69,42 +68,42 @@ export default function VideoForm({ onSubmit, initialData, loading, success, err
     };
 
     return (
-        <form onSubmit={handleSubmit} className="mb-6">
-            <input type="text" placeholder="Título" value={titulo} onChange={e => setTitulo(e.target.value)} required className="w-full mb-4 px-4 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400" />
-            <textarea placeholder="Descrição" value={descricao} onChange={e => setDescricao(e.target.value)} className="w-full mb-4 px-4 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+        <form onSubmit={handleSubmit} className="mb-6 bg-white border border-gray-200 rounded shadow-sm p-6">
+            <input type="text" placeholder="Título" value={titulo} onChange={e => setTitulo(e.target.value)} required className="w-full mb-4 px-4 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-700 text-gray-900" />
+            <textarea placeholder="Descrição" value={descricao} onChange={e => setDescricao(e.target.value)} className="w-full mb-4 px-4 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-700 text-gray-900" />
             <input type="file" accept="video/*" onChange={e => setArquivo(e.target.files?.[0] || null)} required className="w-full mb-4" />
             <div className="mb-4">
-                <label className="block mb-1 font-semibold">Playlists (Cursos)</label>
+                <label className="block mb-1 font-semibold text-gray-700">Playlists (Cursos)</label>
                 <div className="flex gap-2 items-center">
-                    <select multiple value={playlistsIds.map(String)} onChange={e => setPlaylistsIds(Array.from(e.target.selectedOptions, o => Number(o.value)))} className="flex-1 px-2 py-2 rounded border border-gray-300 h-24">
+                    <select multiple value={playlistsIds.map(String)} onChange={e => setPlaylistsIds(Array.from(e.target.selectedOptions, o => Number(o.value)))} className="flex-1 px-2 py-2 rounded border border-gray-300 h-24 focus:outline-none focus:ring-2 focus:ring-gray-700 text-gray-900">
                         {playlists.map(pl => (
                             <option key={pl.id} value={pl.id}>{pl.nome}</option>
                         ))}
                     </select>
-                    <button type="button" onClick={() => setPlaylistModal(true)} className="px-2 py-1 rounded bg-blue-200 text-blue-800">Nova</button>
+                    <button type="button" onClick={() => setPlaylistModal(true)} className="px-2 py-1 rounded bg-gray-200 text-gray-800 hover:bg-gray-300 transition border border-gray-300">Nova</button>
                 </div>
                 {playlistLoading && <p className="text-sm text-gray-500">Criando playlist...</p>}
                 {playlistError && <p className="text-sm text-red-600">{playlistError}</p>}
             </div>
             <div className="flex gap-2">
-                <button type="submit" className="flex-1 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">{editMode ? 'Salvar edição' : 'Cadastrar vídeo'}</button>
+                <button type="submit" className="flex-1 py-2 rounded bg-gray-800 text-white font-semibold hover:bg-gray-700 transition shadow-sm">{editMode ? 'Salvar edição' : 'Cadastrar vídeo'}</button>
                 {editMode && onCancel && (
-                    <button type="button" onClick={onCancel} className="flex-1 py-2 rounded bg-gray-300 text-gray-800 font-semibold hover:bg-gray-400 transition">Cancelar</button>
+                    <button type="button" onClick={onCancel} className="flex-1 py-2 rounded bg-gray-200 text-gray-800 font-semibold hover:bg-gray-300 transition border border-gray-300">Cancelar</button>
                 )}
             </div>
-            {loading && <p className="text-center mt-2">Salvando...</p>}
+            {loading && <p className="text-center mt-2 text-gray-500">Salvando...</p>}
             {error && <p className="text-red-600 text-center mt-2">{error}</p>}
             {success && <p className="text-green-600 text-center mt-2">{success}</p>}
 
             {/* Modal de playlist */}
             {playlistModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded shadow-lg w-full max-w-xs">
-                        <h3 className="font-bold mb-2">Nova Playlist</h3>
-                        <input type="text" value={novaPlaylist} onChange={e => setNovaPlaylist(e.target.value)} placeholder="Nome da playlist" className="w-full px-2 py-1 rounded border border-gray-300 mb-2" />
+                    <div className="bg-white p-6 rounded shadow-lg w-full max-w-xs border border-gray-200">
+                        <h3 className="font-bold mb-2 text-gray-900">Nova Playlist</h3>
+                        <input type="text" value={novaPlaylist} onChange={e => setNovaPlaylist(e.target.value)} placeholder="Nome da playlist" className="w-full px-2 py-1 rounded border border-gray-300 mb-2 focus:outline-none focus:ring-2 focus:ring-gray-700 text-gray-900" />
                         <div className="flex gap-2">
-                            <button onClick={handlePlaylistCreate} className="flex-1 py-1 rounded bg-green-500 text-white">Criar</button>
-                            <button onClick={() => setPlaylistModal(false)} className="flex-1 py-1 rounded bg-gray-300">Cancelar</button>
+                            <button onClick={handlePlaylistCreate} className="flex-1 py-1 rounded bg-gray-800 text-white hover:bg-gray-700 transition shadow-sm">Criar</button>
+                            <button onClick={() => setPlaylistModal(false)} className="flex-1 py-1 rounded bg-gray-200 text-gray-800 hover:bg-gray-300 transition border border-gray-300">Cancelar</button>
                         </div>
                         {playlistLoading && <p className="text-sm text-gray-500 mt-2">Criando playlist...</p>}
                         {playlistError && <p className="text-sm text-red-600 mt-2">{playlistError}</p>}

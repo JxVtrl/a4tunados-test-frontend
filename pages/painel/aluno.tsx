@@ -288,7 +288,7 @@ export default function PainelAluno() {
   return (
     <ProtectedRoute allowedTypes={["aluno"]}>
       <Navbar />
-      <div className="p-8 bg-gray-100 mt-10 min-h-screen">
+      <div className="p-8 bg-gray-50 mt-10 min-h-screen">
         {!playlistSelecionada && (
           <Breadcrumb
             items={[
@@ -314,14 +314,14 @@ export default function PainelAluno() {
         {/* Se um professor foi selecionado e não está em uma playlist específica, mostrar playlists do professor */}
         {professorSelecionado && !playlistSelecionada && (
           <>
-            <h3 className="text-xl font-bold mb-4">Playlists de {professorSelecionado.username}</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Playlists de {professorSelecionado.username}</h3>
             {loadingPlaylistsProf && <div className="text-center text-gray-500 mb-4">Carregando playlists...</div>}
             {erroPlaylistsProf && <div className="text-center text-red-500 mb-4">{erroPlaylistsProf}</div>}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
               {professorPlaylists.map((pl) => (
                 <div
                   key={pl.id}
-                  className="bg-white rounded-xl shadow-lg p-4 cursor-pointer hover:bg-blue-50 flex flex-col items-center"
+                  className="bg-white border border-gray-200 rounded shadow-sm p-4 cursor-pointer hover:bg-gray-100 flex flex-col items-center"
                   onClick={() => {
                     setViewMode("videos");
                     setPlaylistSelecionada(pl);
@@ -330,7 +330,7 @@ export default function PainelAluno() {
                   {pl.foto && (
                     <img src={pl.foto} alt={pl.nome} className="w-24 h-24 object-cover rounded mb-2" />
                   )}
-                  <h4 className="font-bold text-lg mb-1 text-center">{pl.nome}</h4>
+                  <h4 className="font-bold text-lg text-gray-900 mb-1 text-center">{pl.nome}</h4>
                   <p className="text-gray-600 text-sm text-center">{pl.descricao}</p>
                 </div>
               ))}
@@ -342,26 +342,27 @@ export default function PainelAluno() {
         )}
 
         {/* Grid de vídeos (de playlist, professor ou todos) */}
-        <h3 className="text-xl font-bold mb-4">
+        <h3 className="text-xl font-bold text-gray-900 mb-4">
           {playlistSelecionada
             ? `Vídeos da Playlist: ${playlistSelecionada.nome}`
             : professorSelecionado
               ? `Todos os vídeos de ${professorSelecionado.username}`
               : "Todos os Vídeos"}
         </h3>
-        {loading && <p className="text-center">Carregando vídeos...</p>}
+        {loading && <p className="text-center text-gray-500">Carregando vídeos...</p>}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredAndSortedVideos.map((video) => {
             return (
-              <VideoCard
-                key={video.id}
-                titulo={video.titulo}
-                descricao={video.descricao}
-                link={video.arquivo}
-                criado_em={video.criado_em}
-                onClick={() => router.push(`/video/${video.id}`)}
-                professor_nome={video.professor_nome}
-              />
+              <div key={video.id} className="bg-white border border-gray-200 rounded shadow-sm cursor-pointer hover:bg-gray-100 flex flex-col">
+                <VideoCard
+                  titulo={video.titulo}
+                  descricao={video.descricao}
+                  link={video.arquivo}
+                  criado_em={video.criado_em}
+                  onClick={() => router.push(`/video/${video.id}`)}
+                  professor_nome={video.professor_nome}
+                />
+              </div>
             )
           })}
           {filteredAndSortedVideos.length === 0 && !loading && (

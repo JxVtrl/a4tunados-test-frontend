@@ -153,7 +153,7 @@ export default function PainelProfessor() {
   return (
     <ProtectedRoute allowedTypes={["professor"]}>
       <Navbar />
-      <div className="p-8 bg-gray-100 mt-10 min-h-screen">
+      <div className="p-8 bg-gray-50 mt-10 min-h-screen">
         <Breadcrumb
           items={[
             { label: "Painel do Professor", href: "/painel/professor" },
@@ -167,7 +167,7 @@ export default function PainelProfessor() {
         />
 
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-center">
+          <h2 className="text-2xl font-bold text-gray-900 text-center">
             {playlistSelecionada
               ? `Vídeos da Playlist: ${playlistSelecionada.nome}`
               : viewMode === 'videos'
@@ -177,7 +177,7 @@ export default function PainelProfessor() {
           <div className="flex items-center gap-2">
             {playlistSelecionada && (
               <button
-                className="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition"
+                className="px-4 py-2 bg-gray-800 text-white rounded shadow-sm hover:bg-gray-700 transition border border-gray-700"
                 onClick={() => handleEditPlaylist(playlistSelecionada)}
               >
                 Editar Playlist
@@ -185,7 +185,7 @@ export default function PainelProfessor() {
             )}
             {(viewMode === 'videos' || playlistSelecionada) && (
               <button
-                className="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition"
+                className="px-4 py-2 bg-gray-800 text-white rounded shadow-sm hover:bg-gray-700 transition border border-gray-700"
                 onClick={() => setIsUploadModalOpen(true)}
               >
                 Enviar Vídeo
@@ -193,7 +193,7 @@ export default function PainelProfessor() {
             )}
             {viewMode === 'playlists' && !playlistSelecionada && (
               <button
-                className="px-4 py-2 bg-green-600 text-white rounded shadow hover:bg-green-700 transition ml-2"
+                className="px-4 py-2 bg-gray-800 text-white rounded shadow-sm hover:bg-gray-700 transition border border-gray-700 ml-2"
                 onClick={() => setIsCreatePlaylistModalOpen(true)}
               >
                 Criar nova playlist
@@ -202,7 +202,7 @@ export default function PainelProfessor() {
           </div>
         </div>
 
-        {loading && <p className="text-center">Carregando...</p>}
+        {loading && <p className="text-center text-gray-600">Carregando...</p>}
 
         {/* Listagem de playlists */}
         {viewMode === 'playlists' && !playlistSelecionada && (
@@ -211,7 +211,7 @@ export default function PainelProfessor() {
               {playlists.map((playlist) => (
                 <div
                   key={playlist.id}
-                  className="p-4 bg-white rounded shadow cursor-pointer hover:bg-gray-50"
+                  className="p-4 bg-white border border-gray-200 rounded shadow-sm cursor-pointer hover:bg-gray-100 flex flex-col items-center"
                   onClick={() => handlePlaylistClickInCard(playlist.id)}
                 >
                   <Image
@@ -224,8 +224,8 @@ export default function PainelProfessor() {
                       aspectRatio: 1
                     }}
                   />
-                  <h3 className="text-lg font-semibold">{playlist.nome}</h3>
-                  <p className="text-gray-500">{playlist.descricao}</p>
+                  <h3 className="text-lg font-semibold text-gray-900 text-center">{playlist.nome}</h3>
+                  <p className="text-gray-600 text-center">{playlist.descricao}</p>
                 </div>
               ))}
             </div>
@@ -281,6 +281,7 @@ export default function PainelProfessor() {
         open={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
         onVideoUploaded={handleVideoUploaded}
+        playlistId={playlistSelecionada?.id}
       />
 
       {/* Modal de Edição de Playlist */}

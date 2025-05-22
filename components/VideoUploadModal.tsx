@@ -4,7 +4,14 @@ import VideoDropStep from './VideoDropStep';
 import VideoDetailsStep from './VideoDetailsStep';
 import api from '@/utils/axiosConfig';
 
-export default function VideoUploadModal({ open, onClose, onVideoUploaded }: { open: boolean, onClose: () => void, onVideoUploaded: () => void }) {
+interface VideoUploadModalProps {
+    open: boolean;
+    onClose: () => void;
+    onVideoUploaded: () => void;
+    playlistId?: number;
+}
+
+export default function VideoUploadModal({ open, onClose, onVideoUploaded, playlistId }: VideoUploadModalProps) {
     const [step, setStep] = useState(1);
     const [videoFile, setVideoFile] = useState<File | null>(null);
 
@@ -52,6 +59,7 @@ export default function VideoUploadModal({ open, onClose, onVideoUploaded }: { o
                         videoFile={videoFile}
                         onBack={() => setStep(1)}
                         onSubmit={handleDetailsSubmit}
+                        playlistId={playlistId}
                     />
                 )}
             </div>

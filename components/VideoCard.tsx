@@ -60,10 +60,10 @@ export default function VideoCard({
   }
 
   return (
-    <li className=" border-b border-gray-200  hover:bg-gray-50 transition cursor-pointer list-none">
+    <li className="bg-white border border-gray-200 rounded shadow-sm hover:shadow-md transition cursor-pointer list-none mb-4">
       <div onClick={handleCardClick} className="flex flex-col items-center">
         <div
-          className="w-full  flex-shrink-0 bg-black rounded overflow-hidden flex  items-center justify-center"
+          className="w-full flex-shrink-0 bg-black rounded-t-md overflow-hidden flex items-center justify-center"
           style={{
             aspectRatio: `16/9`,
           }}
@@ -98,17 +98,17 @@ export default function VideoCard({
           )}
 
           <div className="flex-1 flex flex-col gap-[6px]">
-            <p className=" text-[16px] leading-[100%] font-[600] text-gray-800">
+            <p className="text-[16px] leading-[100%] font-semibold text-gray-900">
               {titulo}
             </p>
             {professor_nome && (
-              <p className=" text-[14px] text-gray-500 leading-[100%]">
+              <p className="text-[14px] text-gray-500 leading-[100%]">
                 {professor_nome}
               </p>
             )}
             {/* Adicionado mb-1 */}
             {criado_em && (
-              <p className=" text-[14px] text-gray-400 leading-[100%]">
+              <p className="text-[14px] text-gray-400 leading-[100%]">
                 {new Date(criado_em).toLocaleString()}
               </p>
             )}
@@ -117,7 +117,7 @@ export default function VideoCard({
                 {onEdit && (
                   <button
                     onClick={onEdit}
-                    className="flex-1 py-1 rounded bg-yellow-400 text-black font-semibold hover:bg-yellow-500 transition"
+                    className="flex-1 py-1 rounded bg-gray-800 text-white font-semibold hover:bg-gray-700 transition shadow-sm"
                   >
                     Editar
                   </button>
@@ -125,7 +125,7 @@ export default function VideoCard({
                 {onDelete && (
                   <button
                     onClick={onDelete}
-                    className="flex-1 py-1 rounded bg-red-600 text-white font-semibold hover:bg-red-700 transition"
+                    className="flex-1 py-1 rounded bg-red-500 text-white font-semibold hover:bg-red-700 transition shadow-sm"
                   >
                     Excluir
                   </button>

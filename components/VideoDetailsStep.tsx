@@ -3,7 +3,14 @@ import React, { useEffect, useState } from 'react';
 import PlaylistSelectModal from './PlaylistSelectModal';
 import api from '@/utils/axiosConfig';
 
-export default function VideoDetailsStep({ videoFile, onBack, onSubmit }: { videoFile: File, onBack: () => void, onSubmit: (data: any) => void }) {
+interface VideoDetailsStepProps {
+    videoFile: File;
+    onBack: () => void;
+    onSubmit: (data: any) => void;
+    playlistId?: number;
+}
+
+export default function VideoDetailsStep({ videoFile, onBack, onSubmit, playlistId }: VideoDetailsStepProps) {
     const [titulo, setTitulo] = useState('');
     const [descricao, setDescricao] = useState('');
     const [playlists, setPlaylists] = useState<any[]>([]);
@@ -24,6 +31,16 @@ export default function VideoDetailsStep({ videoFile, onBack, onSubmit }: { vide
     useEffect(() => {
         buscarPlaylists()
     }, []);
+
+    useEffect(() => {
+        if (playlistId && playlists.length > 0) {
+            const pl = playlists.find((p: any) => p.id === playlistId);
+            if (pl && !selected.some((s: any) => s.id === pl.id)) {
+                setSelected((prev: any[]) => [...prev, pl]);
+            }
+        }
+        // eslint-disable-next-line
+    }, [playlistId, playlists]);
 
     return (
         <div className="p-6">
