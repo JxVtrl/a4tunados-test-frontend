@@ -40,7 +40,7 @@ export default function ProfessorAluno() {
                             className="p-4 bg-white border border-gray-200 rounded shadow-sm cursor-pointer hover:bg-gray-100 flex flex-col items-center"
                             onClick={() => router.push(`/painel/aluno/playlist/${pl.id}`)}
                         >
-                            <Image src={pl.foto} alt={pl.nome} width={200} height={200} className="w-full object-cover rounded mb-2" style={{ aspectRatio: 1 }} />
+                            <Image src={pl.foto.replace(`http://`, `https://`)} alt={pl.nome} width={200} height={200} className="w-full object-cover rounded mb-2" style={{ aspectRatio: 1 }} />
                             <h3 className="text-lg font-semibold text-gray-900 text-center">{pl.nome}</h3>
                             <p className="text-gray-600 text-center">{pl.descricao}</p>
                         </div>
@@ -60,7 +60,7 @@ export default function ProfessorAluno() {
                             link={`/video/${video.id}`}
                             criado_em={video.criado_em}
                             professor_nome={video.professor_nome}
-                            thumbnail={video.thumbnail}
+                            thumbnail={video.thumbnail.replace(`http://`, `https://`)}
                             professor_id={video.professor_id}
                         />
                     ))}

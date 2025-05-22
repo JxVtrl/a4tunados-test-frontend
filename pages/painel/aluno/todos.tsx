@@ -57,7 +57,7 @@ export default function TodosVideosAluno() {
                                     link={`/video/${video.id}`}
                                     criado_em={video.criado_em}
                                     professor_nome={video.professor_nome}
-                                    thumbnail={video.thumbnail}
+                                    thumbnail={video.thumbnail.replace(`http://`, `https://`)}
                                     professor_id={video.professor}
                                 />
                             </div>

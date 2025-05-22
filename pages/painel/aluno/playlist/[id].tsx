@@ -28,7 +28,7 @@ export default function PlaylistAluno() {
                 <Breadcrumb items={[{ label: "Painel do Aluno", href: "/painel/aluno" }, { label: playlist?.nome || "Playlist" }]} />
                 {playlist && (
                     <div className="flex items-center gap-4 mb-6">
-                        <Image src={playlist.foto} alt={playlist.nome} width={80} height={80} />
+                        <Image src={playlist.foto.replace(`http://`, `https://`)} alt={playlist.nome} width={80} height={80} />
                         <div>
                             <h2 className="text-2xl font-bold mb-1">{playlist.nome}</h2>
                             <p className="text-gray-600">{playlist.descricao}</p>
@@ -39,8 +39,6 @@ export default function PlaylistAluno() {
                 {loading && <p className="text-center text-gray-500">Carregando vídeos...</p>}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {videos.map((video) => {
-                        console.log(`video`, video)
-
                         return (
                             <VideoCard
                                 key={video.id}
@@ -49,7 +47,7 @@ export default function PlaylistAluno() {
                                 link={`/video/${video.id}`}
                                 criado_em={video.criado_em}
                                 professor_nome={video.professor_nome}
-                                thumbnail={video.thumbnail}
+                                thumbnail={video.thumbnail.replace(`http://`, `https://`)}
                                 professor_id={video.professor_id}
                             />
                         )

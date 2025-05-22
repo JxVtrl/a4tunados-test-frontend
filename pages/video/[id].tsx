@@ -101,7 +101,7 @@ export default function VideoPage() {
                           link={`/video/${v.id}`}
                           criado_em={v.criado_em}
                           onEdit={() => router.push(`/video/${v.id}`)}
-                          thumbnail={v.thumbnail}
+                          thumbnail={v.thumbnail.replace(`http://`, `https://`)}
                           professor_id={v.professor?.id}
                         />
                       ))}
@@ -135,7 +135,7 @@ export default function VideoPage() {
                               link={`/video/${v.id}`}
                               criado_em={v.criado_em}
                               onEdit={() => router.push(`/video/${v.id}`)}
-                              thumbnail={v.thumbnail}
+                              thumbnail={v.thumbnail.replace(`http://`, `https://`)}
                               professor_id={v.professor?.id}
                             />
                           ))}
