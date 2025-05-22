@@ -20,7 +20,7 @@ interface VideoCardProps {
   showActions?: boolean
   duracao?: string // Pode ser string ou number dependendo do backend
   onClick?: () => void // Clique no card inteiro
-  professor_nome: string
+  professor_nome?: string
 }
 
 export default function VideoCard({
@@ -61,10 +61,7 @@ export default function VideoCard({
 
   return (
     <li className=" border-b border-gray-200  hover:bg-gray-50 transition cursor-pointer list-none">
-      <div
-        onClick={handleCardClick}
-        className="flex flex-col items-center"
-      >
+      <div onClick={handleCardClick} className="flex flex-col items-center">
         <div
           className="w-full  flex-shrink-0 bg-black rounded overflow-hidden flex  items-center justify-center"
           style={{
@@ -91,12 +88,14 @@ export default function VideoCard({
           )}
         </div>
         <div className="w-full flex gap-2  py-2">
-          <Avatar
-            imageUrl=""
-            name={professor_nome}
-            size={`36px`}
-            onClick={handleAvatarClick} // Adicionando o evento de clique
-          />
+          {professor_nome && (
+            <Avatar
+              imageUrl=""
+              name={professor_nome}
+              size={`36px`}
+              onClick={handleAvatarClick} // Adicionando o evento de clique
+            />
+          )}
 
           <div className="flex-1 flex flex-col gap-[6px]">
             <p className=" text-[16px] leading-[100%] font-[600] text-gray-800">

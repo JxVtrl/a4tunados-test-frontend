@@ -1,138 +1,233 @@
-import { useEffect, useState } from 'react';
-import { useAuth } from '../../utils/AuthContext';
-import ProtectedRoute from '../../components/ProtectedRoute';
-import Navbar from '../../components/Navbar';
-import VideoForm from '../../components/VideoForm';
-import VideoCard from '../../components/VideoCard';
-import VideoUploadModal from '../../components/VideoUploadModal';
-import PlaylistCard from '@/components/PlaylistCard';
-
-interface Video {
-    id: number;
-    titulo: string;
-    descricao: string;
-    arquivo: string;
-    criado_em: string;
-    playlists?: { id: number }[];
-}
+import { useEffect, useState, useMemo } from "react"
+import { useAuth } from "../../utils/AuthContext"
+import ProtectedRoute from "../../components/ProtectedRoute"
+import Navbar from "../../components/Navbar"
+import VideoCard from "../../components/VideoCard"
+import VideoUploadModal from "../../components/VideoUploadModal"
+import { useRouter } from "next/router"
+import Breadcrumb from "@/components/Breadcrumb"
+import EditPlaylistModal from "@/components/EditPlaylistModal"
+import Image from "next/image"
 
 interface Playlist {
-    id: number;
-    nome: string;
+  id: number
+  nome: string
+  descricao: string
+  foto?: string
+}
+
+interface Video {
+  id: number
+  titulo: string
+  descricao: string
+  arquivo: string
+  criado_em: string
+  playlists?: Playlist[]
+  professor: number
+  professor_nome: string
+  duracao?: number
 }
 
 export default function PainelProfessor() {
-    const { token } = useAuth();
-    const [videos, setVideos] = useState<Video[]>([]);
-    const [playlists, setPlaylists] = useState<Playlist[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-    const [showUploadModal, setShowUploadModal] = useState(false);
+  const { token } = useAuth()
+  const router = useRouter()
+  const { playlist: playlistIdQuery } = router.query
 
+  const [allVideos, setAllVideos] = useState<Video[]>([])
+  const [playlists, setPlaylists] = useState<Playlist[]>([])
+  const [playlistSelecionada, setPlaylistSelecionada] =
+    useState<Playlist | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [playlistToEdit, setPlaylistToEdit] = useState<Playlist | null>(null)
 
-    useEffect(() => {
-        if (!token) return;
-        setLoading(true);
-        fetch('http://localhost:8000/api/playlists/', {
-            headers: { Authorization: `Bearer ${token}` }
+  useEffect(() => {
+    if (!token) return
+    setLoading(true)
+
+    // Buscar todas as playlists do professor
+    fetch("http://localhost:8000/api/playlists/", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then((data) => setPlaylists(data))
+      .catch(() => setPlaylists([]))
+
+    // Se há um playlistId na URL, buscar os vídeos dessa playlist específica
+    if (playlistIdQuery) {
+      const id = Number(playlistIdQuery)
+      fetch(`http://localhost:8000/api/playlists/${id}/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => {
+          if (!res.ok) {
+            router.push("/painel/professor") // Redirecionar se não encontrar
+            throw new Error("Playlist not found")
+          }
+          return res.json()
         })
-            .then(res => res.json())
-            .then(data => setPlaylists(data))
-            .catch(() => setError('Erro ao carregar playlists.'))
-            .finally(() => setLoading(false));
-    }, [token]);
-
-
-
-    const handleDelete = async (id: number) => {
-        if (!confirm('Tem certeza que deseja excluir este vídeo?')) return;
-        try {
-            await fetch(`http://localhost:8000/api/videos/${id}/`, {
-                method: 'DELETE',
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setVideos(videos.filter(v => v.id !== id));
-        } catch {
-            setError('Erro ao excluir vídeo.');
-        }
-    };
-
-    const handlePlaylistClick = (playlistId: number) => {
-        console.log(`Playlist clicada: ${playlistId}`);
-        setLoading(true);
-        fetch(`http://localhost:8000/api/playlists/${playlistId}/videos/`, {
-            headers: { Authorization: `Bearer ${token}` }
+        .then((playlistData) => {
+          setPlaylistSelecionada(playlistData)
+          // Buscar os vídeos dessa playlist específica
+          fetch(`http://localhost:8000/api/playlists/${id}/videos/`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+            .then((res) => res.json())
+            .then((videoData) => {
+              setAllVideos(videoData)
+              setLoading(false)
+            })
+            .catch(() => {
+              console.error("Erro ao carregar vídeos da playlist")
+              setLoading(false)
+            })
         })
-            .then(res => res.json())
-            .then(data => setVideos(data))
-            .finally(() => setLoading(false));
-    };
+        .catch((error) => {
+          console.error("Erro ao carregar playlist específica:", error)
+          setLoading(false)
+        })
+    } else {
+      // Se não tem playlistId na URL, buscar todos os vídeos do professor
+      setPlaylistSelecionada(null)
+      fetch("http://localhost:8000/api/videos/", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => res.json())
+        .then((data) => setAllVideos(data))
+        .finally(() => setLoading(false))
+    }
+  }, [token, playlistIdQuery, router])
 
+  const handlePlaylistClickInCard = (playlistId: number) => {
+    router.push(`/painel/professor?playlist=${playlistId}`)
+  }
 
+  const handleVideoUploaded = () => {
+    // Recarregar os vídeos após o upload
+    if (playlistSelecionada) {
+      router.push(`/painel/professor?playlist=${playlistSelecionada.id}`)
+    } else {
+      router.push("/painel/professor")
+    }
+  }
 
-    return (
-        <ProtectedRoute allowedTypes={['professor']}>
-            <Navbar />
-            <div className="min-h-screen bg-gray-100 flex flex-col items-center py-8">
-                <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-2xl mb-8">
-                    <h2 className="text-2xl font-bold mb-6 text-center">Painel do Professor</h2>
-                    <div className="flex justify-end mb-4">
-                        <button
-                            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-                            onClick={() => setShowUploadModal(true)}
-                        >
-                            Enviar vídeo
-                        </button>
-                    </div>
-                    <VideoUploadModal
-                        open={showUploadModal}
-                        onClose={() => setShowUploadModal(false)}
-                        onVideoUploaded={() => {
-                            setLoading(true);
-                            fetch('http://localhost:8000/api/videos/', {
-                                headers: { Authorization: `Bearer ${token}` }
-                            })
-                                .then(res => res.json())
-                                .then(data => setVideos(data))
-                                .finally(() => setLoading(false));
-                        }}
+  const handleEditPlaylist = (playlist: Playlist) => {
+    setPlaylistToEdit(playlist)
+    setIsEditModalOpen(true)
+  }
+    
+    const fetchPlaylists = () => {
+      fetch("http://localhost:8000/api/playlists/", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => res.json())
+        .then((data) => setPlaylists(data))
+        .catch(() => setPlaylists([]))
+    }
+
+  return (
+    <ProtectedRoute allowedTypes={["professor"]}>
+      <Navbar />
+      <div className="p-8 bg-gray-100 min-h-screen">
+        {playlistSelecionada && (
+          <Breadcrumb
+            items={[
+              { label: "Painel do Professor", href: "/painel/professor" },
+              { label: playlistSelecionada.nome },
+            ]}
+            showBack={false}
+          />
+        )}
+
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-center">
+            {!playlistSelecionada
+              ? "Suas Playlists"
+              : `Vídeos da Playlist: ${playlistSelecionada.nome}`}
+          </h2>
+          <div>
+            {playlistSelecionada && (
+              <button
+                className="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition"
+                onClick={() => handleEditPlaylist(playlistSelecionada)}
+              >
+                Editar Playlist
+              </button>
+            )}
+            <button
+              className="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition"
+              onClick={() => setIsUploadModalOpen(true)}
+            >
+              Enviar Vídeo
+            </button>
+          </div>
+        </div>
+
+        {loading && <p className="text-center">Carregando...</p>}
+
+        {!playlistSelecionada && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {playlists.map((playlist) => (
+              <div
+                key={playlist.id}
+                className="p-4 bg-white rounded shadow cursor-pointer hover:bg-gray-50"
+                onClick={() => handlePlaylistClickInCard(playlist.id)}
+                >
+                    <Image
+                        src={playlist.foto || "/default_playlist.png"}
+                        alt={playlist.nome}
+                        width={200}
+                        height={200}
+                        className="w-full object-cover rounded mb-2"
+                        style={{
+                        aspectRatio: 1}}
                     />
-                    {loading && <p className="text-center">Carregando vídeos...</p>}
+                    <h3 className="text-lg font-semibold">{playlist.nome}</h3>
+                    <p className="text-gray-500">{playlist.descricao}</p>
+              </div>
+            ))}
+          </div>
+        )}
 
-                    {error && <p className="text-center text-red-500">{error}</p>}
+        {playlistSelecionada && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {allVideos.map((video) => (
+              <VideoCard
+                key={video.id}
+                titulo={video.titulo}
+                descricao={video.descricao}
+                link={video.arquivo}
+                criado_em={video.criado_em}
+                professor_nome={video.professor_nome}
+                onClick={() => router.push(`/video/${video.id}`)}
+                showActions
+              />
+            ))}
+          </div>
+        )}
+      </div>
 
-                    <h3 className="text-lg font-semibold mb-4">Suas playlists ({playlists.length})</h3>
-                    <ul>
-                        {playlists.map(playlist => (
-                            <PlaylistCard
-                                key={playlist.id}
-                                nome={playlist.nome}
-                                onClick={() => handlePlaylistClick(playlist.id)}
-                            />
-                        ))}
-                    </ul>
+      {/* Modal de Upload de Vídeo */}
+      <VideoUploadModal
+        open={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        onVideoUploaded={handleVideoUploaded}
+      />
 
-                    {videos.length > 0 && (
-                        <div className="mt-4">
-                            <h3 className="text-lg font-semibold mb-2">Vídeos da playlist {playlists.find(p => p.id === videos[0].playlists?.[0]?.id)?.nome}</h3>
-                            <ul>
-                                {videos.map(video => (
-                                    <VideoCard
-                                        key={video.id}
-                                        titulo={video.titulo}
-                                        descricao={video.descricao}
-                                        link={video.arquivo}
-                                        criado_em={video.criado_em}
-                                        onDelete={() => handleDelete(video.id)}
-                                        showActions
-                                        id={video.id}
-                                    />
-                                ))}
-                            </ul>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </ProtectedRoute>
-    );
+      {/* Modal de Edição de Playlist */}
+      {playlistToEdit && (
+        <EditPlaylistModal
+          open={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          playlist={playlistToEdit}
+          onSave={() => {
+            setIsEditModalOpen(false)
+            // Recarregar playlists
+            fetchPlaylists()
+          }}
+        />
+      )}
+    </ProtectedRoute>
+  )
 }
