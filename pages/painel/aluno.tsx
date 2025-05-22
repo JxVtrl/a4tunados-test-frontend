@@ -39,6 +39,13 @@ export default function PainelAluno() {
   const [filterPlaylistId, setFilterPlaylistId] = useState("") // Estado para filtro de playlist (usado na view "Todos os Vídeos")
   const [sortOption, setSortOption] = useState("criado_em") // Estado para ordenação
   const [viewMode, setViewMode] = useState<"inicio" | "videos" | "playlists" | "professores">("inicio")
+  const [professores, setProfessores] = useState<{ id: number, username: string, email: string, tipo: string }[]>([])
+  const [loadingProfessores, setLoadingProfessores] = useState(false)
+  const [erroProfessores, setErroProfessores] = useState<string | null>(null)
+  const [professorSelecionado, setProfessorSelecionado] = useState<{ id: number, username: string } | null>(null)
+  const [professorPlaylists, setProfessorPlaylists] = useState<any[]>([])
+  const [loadingPlaylistsProf, setLoadingPlaylistsProf] = useState(false)
+  const [erroPlaylistsProf, setErroPlaylistsProf] = useState<string | null>(null)
 
   useEffect(() => {
     setLoading(true)
@@ -69,15 +76,22 @@ export default function PainelAluno() {
           router.push("/painel/aluno")
           setLoading(false)
         })
+    } else if (professorSelecionado) {
+      // Se um professor foi selecionado, buscar vídeos desse professor
+      setPlaylistSelecionada(null)
+      setFilterPlaylistId("")
+      api.get(`videos/?professor=${professorSelecionado.id}`)
+        .then((res) => setAllVideos(res.data))
+        .finally(() => setLoading(false))
     } else {
-      // Se não tem playlistId na URL, buscar todos os vídeos por padrão
+      // Se não tem playlistId nem professor selecionado, buscar todos os vídeos por padrão
       setPlaylistSelecionada(null) // Garantir que não estamos no modo playlist específica
       setFilterPlaylistId("") // Resetar filtro de playlist ao sair da view de playlist específica
       api.get("videos/")
         .then((res) => setAllVideos(res.data))
         .finally(() => setLoading(false))
     }
-  }, [playlistIdQuery, router]) // Adicionar dependências
+  }, [playlistIdQuery, router, professorSelecionado]) // Adicionar professorSelecionado como dependência
 
   // Lógica de filtragem, busca e ordenação usando useMemo para performance
   const filteredAndSortedVideos = useMemo(() => {
@@ -129,6 +143,32 @@ export default function PainelAluno() {
     }
   }
 
+  // Buscar professores quando viewMode for 'professores'
+  useEffect(() => {
+    if (viewMode === "professores") {
+      setLoadingProfessores(true)
+      setErroProfessores(null)
+      api.get("professores/")
+        .then(res => setProfessores(res.data))
+        .catch(() => setErroProfessores("Erro ao carregar professores"))
+        .finally(() => setLoadingProfessores(false))
+    }
+  }, [viewMode])
+
+  // Buscar playlists do professor selecionado
+  useEffect(() => {
+    if (professorSelecionado) {
+      setLoadingPlaylistsProf(true)
+      setErroPlaylistsProf(null)
+      api.get(`playlists/?professor=${professorSelecionado.id}`)
+        .then(res => setProfessorPlaylists(res.data))
+        .catch(() => setErroPlaylistsProf("Erro ao carregar playlists do professor"))
+        .finally(() => setLoadingPlaylistsProf(false))
+    } else {
+      setProfessorPlaylists([])
+    }
+  }, [professorSelecionado])
+
   // Lógica para renderizar a tela inicial de seleção
   if (viewMode === "inicio") {
     return (
@@ -139,7 +179,11 @@ export default function PainelAluno() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-3xl">
             <button
               className="bg-blue-600 text-white rounded-xl shadow-lg p-8 text-xl font-semibold hover:bg-blue-700 transition"
-              onClick={() => setViewMode("videos")}
+              onClick={() => {
+                setProfessorSelecionado(null);
+                setPlaylistSelecionada(null);
+                setViewMode("videos");
+              }}
             >
               Todos os Vídeos
             </button>
@@ -197,7 +241,7 @@ export default function PainelAluno() {
     )
   }
 
-  // Renderização da listagem de Professores (placeholder)
+  // Renderização da listagem de Professores
   if (viewMode === "professores") {
     return (
       <ProtectedRoute allowedTypes={["aluno"]}>
@@ -211,13 +255,36 @@ export default function PainelAluno() {
             onClick={handleBreadcrumbClick}
           />
           <h2 className="text-2xl font-bold mb-6 text-center">Professores</h2>
-          <div className="text-center text-gray-500">(Em breve: listagem de professores)</div>
+          {loadingProfessores && <div className="text-center text-gray-500">Carregando professores...</div>}
+          {erroProfessores && <div className="text-center text-red-500">{erroProfessores}</div>}
+          {!loadingProfessores && !erroProfessores && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {professores.map((prof) => (
+                <div key={prof.id} className="bg-white rounded-xl shadow-lg p-4 flex flex-col items-center cursor-pointer hover:bg-blue-50"
+                  onClick={() => {
+                    setProfessorSelecionado({ id: prof.id, username: prof.username });
+                    setViewMode("videos");
+                  }}
+                >
+                  <div className="w-16 h-16 rounded-full bg-blue-200 flex items-center justify-center text-2xl font-bold mb-2">
+                    {prof.username[0].toUpperCase()}
+                  </div>
+                  <div className="font-bold text-lg mb-1">{prof.username}</div>
+                  <div className="text-gray-600 text-sm mb-1">{prof.email}</div>
+                  {/* <div className="text-blue-600 text-xs">{prof.tipo}</div> */}
+                </div>
+              ))}
+              {professores.length === 0 && (
+                <div className="col-span-full text-center text-gray-500">Nenhum professor encontrado.</div>
+              )}
+            </div>
+          )}
         </div>
       </ProtectedRoute>
     )
   }
 
-  // Renderização padrão: Todos os Vídeos (ou vídeos de uma playlist)
+  // Renderização padrão: Todos os Vídeos (ou vídeos de uma playlist ou de um professor)
   return (
     <ProtectedRoute allowedTypes={["aluno"]}>
       <Navbar />
@@ -226,7 +293,9 @@ export default function PainelAluno() {
           <Breadcrumb
             items={[
               { label: "Painel do Aluno", href: "/painel/aluno" },
-              { label: "Todos os Vídeos" },
+              professorSelecionado
+                ? { label: `Conteúdos de ${professorSelecionado.username}` }
+                : { label: "Todos os Vídeos" },
             ]}
             onClick={handleBreadcrumbClick}
           />
@@ -242,49 +311,45 @@ export default function PainelAluno() {
           />
         )}
 
-        <h2 className="text-2xl font-bold mb-6 text-center">
-          {!playlistSelecionada
-            ? "Todos os Vídeos"
-            : `Vídeos da Playlist: ${playlistSelecionada.nome}`}
-        </h2>
-
-        {!playlistSelecionada && (
-          <div className="flex flex-col md:flex-row gap-4 mb-6 w-full items-center">
-            <input
-              type="text"
-              placeholder="Buscar vídeos..."
-              className="px-3 py-2 border rounded shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 w-full max-w-xs"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <div className="flex flex-row gap-2 w-full md:w-auto">
-              <select
-                className="py-2 border rounded shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 w-full md:min-w-[200px]"
-                value={filterPlaylistId}
-                onChange={(e) => setFilterPlaylistId(e.target.value)}
-              >
-                <option value="">Todas as Playlists</option>
-                {playlists.map((pl) => (
-                  <option key={pl.id} value={pl.id}>
-                    {pl.nome}
-                  </option>
-                ))}
-              </select>
-              <select
-                className="py-2 border rounded shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 w-full md:min-w-[200px]"
-                value={sortOption}
-                onChange={(e) => setSortOption(e.target.value)}
-              >
-                <option value="criado_em">Ordenar por Data</option>
-                <option value="titulo">Ordenar por Nome</option>
-                {/* Adicione "duracao" como opção de ordenação se tiver o dado no backend */}
-              </select>
+        {/* Se um professor foi selecionado e não está em uma playlist específica, mostrar playlists do professor */}
+        {professorSelecionado && !playlistSelecionada && (
+          <>
+            <h3 className="text-xl font-bold mb-4">Playlists de {professorSelecionado.username}</h3>
+            {loadingPlaylistsProf && <div className="text-center text-gray-500 mb-4">Carregando playlists...</div>}
+            {erroPlaylistsProf && <div className="text-center text-red-500 mb-4">{erroPlaylistsProf}</div>}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
+              {professorPlaylists.map((pl) => (
+                <div
+                  key={pl.id}
+                  className="bg-white rounded-xl shadow-lg p-4 cursor-pointer hover:bg-blue-50 flex flex-col items-center"
+                  onClick={() => {
+                    setViewMode("videos");
+                    setPlaylistSelecionada(pl);
+                  }}
+                >
+                  {pl.foto && (
+                    <img src={pl.foto} alt={pl.nome} className="w-24 h-24 object-cover rounded mb-2" />
+                  )}
+                  <h4 className="font-bold text-lg mb-1 text-center">{pl.nome}</h4>
+                  <p className="text-gray-600 text-sm text-center">{pl.descricao}</p>
+                </div>
+              ))}
+              {professorPlaylists.length === 0 && !loadingPlaylistsProf && (
+                <div className="col-span-full text-center text-gray-500">Nenhuma playlist encontrada.</div>
+              )}
             </div>
-          </div>
+          </>
         )}
 
+        {/* Grid de vídeos (de playlist, professor ou todos) */}
+        <h3 className="text-xl font-bold mb-4">
+          {playlistSelecionada
+            ? `Vídeos da Playlist: ${playlistSelecionada.nome}`
+            : professorSelecionado
+              ? `Todos os vídeos de ${professorSelecionado.username}`
+              : "Todos os Vídeos"}
+        </h3>
         {loading && <p className="text-center">Carregando vídeos...</p>}
-
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredAndSortedVideos.map((video) => {
             return (
@@ -299,6 +364,9 @@ export default function PainelAluno() {
               />
             )
           })}
+          {filteredAndSortedVideos.length === 0 && !loading && (
+            <div className="col-span-full text-center text-gray-500">Nenhum vídeo encontrado.</div>
+          )}
         </div>
       </div>
     </ProtectedRoute>

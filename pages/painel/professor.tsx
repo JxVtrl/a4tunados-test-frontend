@@ -9,6 +9,7 @@ import Breadcrumb from "@/components/Breadcrumb"
 import EditPlaylistModal from "@/components/EditPlaylistModal"
 import Image from "next/image"
 import api from "@/utils/axiosConfig"
+import PlaylistSelectModal from "@/components/PlaylistSelectModal"
 
 interface Playlist {
   id: number
@@ -41,6 +42,8 @@ export default function PainelProfessor() {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [playlistToEdit, setPlaylistToEdit] = useState<Playlist | null>(null)
+  const [viewMode, setViewMode] = useState<'inicio' | 'videos' | 'playlists'>('inicio')
+  const [isCreatePlaylistModalOpen, setIsCreatePlaylistModalOpen] = useState(false)
 
   useEffect(() => {
     setLoading(true)
@@ -104,27 +107,74 @@ export default function PainelProfessor() {
       .catch(() => setPlaylists([]))
   }
 
+  // Função para lidar com clique no breadcrumb
+  const handleBreadcrumbClick = (href: string) => {
+    if (href === "/painel/professor") {
+      setViewMode("inicio")
+      setPlaylistSelecionada(null)
+      router.push("/painel/professor")
+    } else {
+      router.push(href)
+    }
+  }
+
+  // Tela inicial de seleção
+  if (viewMode === 'inicio') {
+    return (
+      <ProtectedRoute allowedTypes={["professor"]}>
+        <Navbar />
+        <div className="p-8 pb-[25vh] flex flex-col items-center justify-center min-h-screen bg-gray-100">
+          <h2 className="text-2xl font-bold mb-8 text-center">O que você deseja ver?</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-2xl">
+            <button
+              className="bg-blue-600 text-white rounded-xl shadow-lg p-8 text-xl font-semibold hover:bg-blue-700 transition"
+              onClick={() => {
+                setViewMode('videos');
+                setPlaylistSelecionada(null);
+              }}
+            >
+              Todos seus vídeos
+            </button>
+            <button
+              className="bg-green-600 text-white rounded-xl shadow-lg p-8 text-xl font-semibold hover:bg-green-700 transition"
+              onClick={() => {
+                setViewMode('playlists');
+                setPlaylistSelecionada(null);
+              }}
+            >
+              Todas suas playlists
+            </button>
+          </div>
+        </div>
+      </ProtectedRoute>
+    )
+  }
+
   return (
     <ProtectedRoute allowedTypes={["professor"]}>
       <Navbar />
-      <div className="p-8 bg-gray-100 min-h-screen">
-        {playlistSelecionada && (
-          <Breadcrumb
-            items={[
-              { label: "Painel do Professor", href: "/painel/professor" },
-              { label: playlistSelecionada.nome },
-            ]}
-            showBack={false}
-          />
-        )}
+      <div className="p-8 bg-gray-100 mt-10 min-h-screen">
+        <Breadcrumb
+          items={[
+            { label: "Painel do Professor", href: "/painel/professor" },
+            playlistSelecionada
+              ? { label: playlistSelecionada.nome }
+              : viewMode === 'videos'
+                ? { label: 'Todos seus vídeos' }
+                : { label: 'Todas suas playlists' },
+          ]}
+          onClick={handleBreadcrumbClick}
+        />
 
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-center">
-            {!playlistSelecionada
-              ? "Suas Playlists"
-              : `Vídeos da Playlist: ${playlistSelecionada.nome}`}
+            {playlistSelecionada
+              ? `Vídeos da Playlist: ${playlistSelecionada.nome}`
+              : viewMode === 'videos'
+                ? 'Todos seus vídeos'
+                : 'Suas Playlists'}
           </h2>
-          <div>
+          <div className="flex items-center gap-2">
             {playlistSelecionada && (
               <button
                 className="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition"
@@ -133,43 +183,82 @@ export default function PainelProfessor() {
                 Editar Playlist
               </button>
             )}
-            <button
-              className="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition"
-              onClick={() => setIsUploadModalOpen(true)}
-            >
-              Enviar Vídeo
-            </button>
+            {(viewMode === 'videos' || playlistSelecionada) && (
+              <button
+                className="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition"
+                onClick={() => setIsUploadModalOpen(true)}
+              >
+                Enviar Vídeo
+              </button>
+            )}
+            {viewMode === 'playlists' && !playlistSelecionada && (
+              <button
+                className="px-4 py-2 bg-green-600 text-white rounded shadow hover:bg-green-700 transition ml-2"
+                onClick={() => setIsCreatePlaylistModalOpen(true)}
+              >
+                Criar nova playlist
+              </button>
+            )}
           </div>
         </div>
 
         {loading && <p className="text-center">Carregando...</p>}
 
-        {!playlistSelecionada && (
+        {/* Listagem de playlists */}
+        {viewMode === 'playlists' && !playlistSelecionada && (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {playlists.map((playlist) => (
+                <div
+                  key={playlist.id}
+                  className="p-4 bg-white rounded shadow cursor-pointer hover:bg-gray-50"
+                  onClick={() => handlePlaylistClickInCard(playlist.id)}
+                >
+                  <Image
+                    src={playlist.foto || "/default_playlist.png"}
+                    alt={playlist.nome}
+                    width={200}
+                    height={200}
+                    className="w-full object-cover rounded mb-2"
+                    style={{
+                      aspectRatio: 1
+                    }}
+                  />
+                  <h3 className="text-lg font-semibold">{playlist.nome}</h3>
+                  <p className="text-gray-500">{playlist.descricao}</p>
+                </div>
+              ))}
+            </div>
+            {isCreatePlaylistModalOpen && (
+              <PlaylistSelectModal
+                onClose={() => {
+                  setIsCreatePlaylistModalOpen(false)
+                  fetchPlaylists()
+                }}
+              />
+            )}
+          </>
+        )}
+
+        {playlistSelecionada && (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {playlists.map((playlist) => (
-              <div
-                key={playlist.id}
-                className="p-4 bg-white rounded shadow cursor-pointer hover:bg-gray-50"
-                onClick={() => handlePlaylistClickInCard(playlist.id)}
-              >
-                <Image
-                  src={playlist.foto || "/default_playlist.png"}
-                  alt={playlist.nome}
-                  width={200}
-                  height={200}
-                  className="w-full object-cover rounded mb-2"
-                  style={{
-                    aspectRatio: 1
-                  }}
-                />
-                <h3 className="text-lg font-semibold">{playlist.nome}</h3>
-                <p className="text-gray-500">{playlist.descricao}</p>
-              </div>
+            {allVideos.map((video) => (
+              <VideoCard
+                key={video.id}
+                titulo={video.titulo}
+                descricao={video.descricao}
+                link={video.arquivo}
+                criado_em={video.criado_em}
+                professor_nome={video.professor_nome}
+                onClick={() => router.push(`/video/${video.id}`)}
+                showActions
+              />
             ))}
           </div>
         )}
 
-        {playlistSelecionada && (
+        {/* Listagem de vídeos do professor */}
+        {viewMode === 'videos' && !playlistSelecionada && (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {allVideos.map((video) => (
               <VideoCard
