@@ -8,7 +8,7 @@ interface Playlist {
 
 interface VideoFormProps {
     onSubmit: (data: FormData) => Promise<void>;
-    initialData?: { titulo: string; descricao: string; playlistsIds?: number[] };
+    initialData?: { titulo: string; descricao: string; playlistsIds?: number[]; thumbnail?: string };
     loading?: boolean;
     success?: string;
     error?: string;
@@ -58,12 +58,15 @@ export default function VideoForm({ onSubmit, initialData, loading, success, err
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!arquivo) return;
         const formData = new FormData();
         formData.append('titulo', titulo);
         formData.append('descricao', descricao);
-        formData.append('arquivo', arquivo);
         playlistsIds.forEach(id => formData.append('playlists', id.toString()));
+        if (editMode) {
+            if (arquivo) formData.append('thumbnail', arquivo);
+        } else {
+            if (arquivo) formData.append('arquivo', arquivo);
+        }
         await onSubmit(formData);
     };
 
@@ -71,7 +74,20 @@ export default function VideoForm({ onSubmit, initialData, loading, success, err
         <form onSubmit={handleSubmit} className="mb-6 bg-white border border-gray-200 rounded shadow-sm p-6">
             <input type="text" placeholder="Título" value={titulo} onChange={e => setTitulo(e.target.value)} required className="w-full mb-4 px-4 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-700 text-gray-900" />
             <textarea placeholder="Descrição" value={descricao} onChange={e => setDescricao(e.target.value)} className="w-full mb-4 px-4 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-700 text-gray-900" />
-            <input type="file" accept="video/*" onChange={e => setArquivo(e.target.files?.[0] || null)} required className="w-full mb-4" />
+            {editMode ? (
+                <div className="mb-4">
+                    <label className="block mb-1 font-semibold text-gray-700">Thumbnail</label>
+                    <input type="file" accept="image/*" onChange={e => setArquivo(e.target.files?.[0] || null)} className="w-full mb-2" />
+                    {initialData?.thumbnail && (
+                        <img src={initialData.thumbnail} alt="Thumbnail atual" className="w-32 h-20 object-cover rounded mb-2 border" />
+                    )}
+                </div>
+            ) : (
+                <div className="mb-4">
+                    <label className="block mb-1 font-semibold text-gray-700">Arquivo de vídeo</label>
+                    <input type="file" accept="video/*" onChange={e => setArquivo(e.target.files?.[0] || null)} required className="w-full mb-2" />
+                </div>
+            )}
             <div className="mb-4">
                 <label className="block mb-1 font-semibold text-gray-700">Playlists (Cursos)</label>
                 <div className="flex gap-2 items-center">

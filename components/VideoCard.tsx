@@ -45,6 +45,7 @@ export default function VideoCard({
 
   // Usar um div para o conteúdo clicável principal para não conflitar com botões internos
   const handleCardClick = (e: React.MouseEvent) => {
+    console.log(e.target)
     if (
       e.target instanceof HTMLButtonElement ||
       e.target instanceof HTMLSpanElement ||
@@ -58,12 +59,13 @@ export default function VideoCard({
   }
 
   return (
-    <li
+    <Link
+      href={link}
       className={`bg-white border-none rounded-xl overflow-hidden  transition cursor-pointer list-none group flex flex-col h-full`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      onClick={handleCardClick}
       style={{ minWidth: 0 }}
+      onClick={handleCardClick}
     >
       <div className="relative w-full flex-shrink-0 bg-black rounded-t-xl overflow-hidden flex items-center justify-center" style={{ aspectRatio: `16/9` }}>
         {thumbnail ? (
@@ -141,6 +143,6 @@ export default function VideoCard({
           )}
         </div>
       )}
-    </li>
+    </Link>
   )
 }

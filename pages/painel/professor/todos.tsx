@@ -46,10 +46,10 @@ export default function TodosVideosProfessor() {
                             key={video.id}
                             titulo={video.titulo}
                             descricao={video.descricao}
-                            link={video.arquivo}
+                            link={`/painel/professor/video/${video.id}`}
                             criado_em={video.criado_em}
                             professor_nome={video.professor_nome}
-                            onClick={() => router.push(`/video/${video.id}`)}
+                            onClick={() => router.push(`/painel/professor/video/${video.id}`)}
                             showActions
                             thumbnail={video.thumbnail}
                             professor_id={video.professor_id}

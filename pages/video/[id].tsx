@@ -85,7 +85,16 @@ export default function VideoPage() {
             <video
               src={video.arquivo}
               controls
-              className="w-full rounded mb-4"
+              className="w-full rounded mb-4 aspect-video"
+              poster={video.thumbnail}
+              preload="metadata"
+              autoPlay={false}
+              muted={false}
+              loop={false}
+              playsInline={false}
+              controlsList="nodownload"
+              disablePictureInPicture={false}
+              disableRemotePlayback={false}
             />
             <h1 className="text-2xl font-bold mb-2">{video.titulo}</h1>
             {/* Avatar e nome do professor */}
