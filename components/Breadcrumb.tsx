@@ -11,22 +11,12 @@ interface BreadcrumbProps {
     showBack?: boolean; // Se quiser mostrar botão de voltar
 }
 
-const Breadcrumb: React.FC<BreadcrumbProps> = ({ items, showBack = false }) => {
+const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
     const router = useRouter();
 
     return (
         <nav className="mb-4 text-sm text-gray-600 flex items-center gap-2 flex-wrap" aria-label="Breadcrumb">
-            {showBack && (
-                <>
-                    <button
-                        className="text-blue-600 hover:underline mr-2"
-                        onClick={() => router.back()}
-                    >
-                        Voltar
-                    </button>
-                    <span className="text-gray-300">|</span>
-                </>
-            )}
+
             {items.map((item, idx) => (
                 <span key={idx} className="flex items-center gap-2">
                     {idx > 0 && <span>/</span>}
