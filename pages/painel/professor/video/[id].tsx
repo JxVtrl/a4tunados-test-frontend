@@ -6,6 +6,7 @@ import Breadcrumb from "@/components/Breadcrumb"
 import Avatar from "@/components/Avatar"
 import VideoForm from "@/components/VideoForm"
 import api from "@/utils/axiosConfig"
+import VideoLayout from "@/components/VideoLayout"
 
 export default function VideoProfessorPage() {
     const router = useRouter()
@@ -63,7 +64,6 @@ export default function VideoProfessorPage() {
                 />
                 <div className="flex flex-col gap-6 max-w-3xl mx-auto">
                     <div className="flex justify-between items-center mb-2">
-                        <h1 className="text-2xl font-bold text-gray-900">{video.titulo}</h1>
                         <div className="flex gap-2">
                             <button
                                 className="px-3 py-1 bg-gray-800 text-white rounded shadow-sm hover:bg-gray-700 transition border border-gray-700 text-sm"
@@ -81,17 +81,7 @@ export default function VideoProfessorPage() {
                             </button>
                         </div>
                     </div>
-                    <video src={video.arquivo} controls className="w-full rounded mb-4 aspect-video" poster={video.thumbnail} preload="metadata" autoPlay={false} muted={false} loop={false} playsInline={false} controlsList="nodownload" disablePictureInPicture={false} disableRemotePlayback={false} />
-                    <div className="flex items-center gap-2 mb-2">
-                        <Avatar name={video.professor_nome || video.professor?.username || "?"} size="40px" onClick={() => { }} />
-                        <span className="text-gray-700 font-medium">
-                            {video.professor_nome || video.professor?.username}
-                        </span>
-                    </div>
-                    <p className="text-gray-700 mb-2">{video.descricao}</p>
-                    <span className="text-xs text-gray-400">
-                        {new Date(video.criado_em).toLocaleString()}
-                    </span>
+                    <VideoLayout video={video} />
                 </div>
                 {editModalOpen && (
                     <div className="fixed inset-0 bg-[#00000080] flex items-center justify-center z-50">

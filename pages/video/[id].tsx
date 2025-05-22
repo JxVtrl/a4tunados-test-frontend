@@ -9,17 +9,18 @@ import Navbar from "@/components/Navbar"
 import ProtectedRoute from "@/components/ProtectedRoute"
 import api from "@/utils/axiosConfig"
 import Avatar from "@/components/Avatar"
+import VideoLayout from "@/components/VideoLayout"
 
-interface Video {
+export interface Video {
   id: number
   titulo: string
   descricao: string
   arquivo: string
   criado_em: string
   playlists?: { id: number; nome: string }[]
-  professor?: { id: number; username: string }
+  professor: { id: number; username: string }
   professor_nome?: string
-  thumbnail?: string
+  thumbnail: string
 }
 export default function VideoPage() {
   const router = useRouter()
@@ -28,14 +29,13 @@ export default function VideoPage() {
   const [playlistVideos, setPlaylistVideos] = useState<Video[]>([])
   const [outrosVideos, setOutrosVideos] = useState<Video[]>([])
   const { user } = useAuth()
+
   useEffect(() => {
     if (!id) return
-    // Buscar o vídeo principal
     api.get(`videos/${id}/`)
       .then((res) => res.data)
       .then((data) => {
         setVideo(data)
-        // Se o vídeo tem playlists, buscar vídeos da primeira playlist
         if (data.playlists && data.playlists.length > 0) {
           api.get(`playlists/${data.playlists[0].id}/videos/`)
             .then((res) => res.data)
@@ -81,51 +81,7 @@ export default function VideoPage() {
         />
         <div className="flex flex-col md:flex-row gap-8 ">
           {/* Vídeo principal */}
-          <div className="flex-1 bg-white rounded-xl shadow p-6">
-            <video
-              src={video.arquivo}
-              controls
-              className="w-full rounded mb-4 aspect-video"
-              poster={video.thumbnail}
-              preload="metadata"
-              autoPlay={false}
-              muted={false}
-              loop={false}
-              playsInline={false}
-              controlsList="nodownload"
-              disablePictureInPicture={false}
-              disableRemotePlayback={false}
-            />
-            <h1 className="text-2xl font-bold mb-2">{video.titulo}</h1>
-            {/* Avatar e nome do professor */}
-            <div
-              className="flex items-center gap-2 mb-2 cursor-pointer hover:opacity-80"
-              onClick={() => {
-                if (video.professor || video.professor_nome) {
-                  router.push({
-                    pathname: '/painel/aluno',
-                    query: {
-                      professorId: video.professor?.id,
-                      professorNome: video.professor_nome || video.professor?.username
-                    }
-                  })
-                }
-              }}
-            >
-              <Avatar
-                name={video.professor_nome || video.professor?.username || "?"}
-                size="40px"
-                onClick={() => { }}
-              />
-              <span className="text-gray-700 font-medium">
-                {video.professor_nome || video.professor?.username}
-              </span>
-            </div>
-            <p className="text-gray-700 mb-2">{video.descricao}</p>
-            <span className="text-xs text-gray-400">
-              {new Date(video.criado_em).toLocaleString()}
-            </span>
-          </div>
+          <VideoLayout video={video} />
           {(playlistVideos.length === 0 && outrosVideos.filter(
             (v) =>
               v.id !== video.id &&

@@ -6,6 +6,8 @@ export default function PlaylistSelectModal({ onClose }: { onClose: () => void }
     const [playlists, setPlaylists] = useState<any[]>([]);
     const [nova, setNova] = useState('');
     const [novaDescricao, setNovaDescricao] = useState('');
+    const [foto, setFoto] = useState<File | null>(null);
+    const [fotoPreview, setFotoPreview] = useState<string | null>(null);
 
     useEffect(() => {
         api.get('playlists/', {
@@ -13,6 +15,14 @@ export default function PlaylistSelectModal({ onClose }: { onClose: () => void }
         })
             .then(res => setPlaylists(res.data));
     }, []);
+
+    useEffect(() => {
+        if (foto) {
+            setFotoPreview(URL.createObjectURL(foto));
+        } else {
+            setFotoPreview(null);
+        }
+    }, [foto]);
 
     const handleCriar = async () => {
         if (nova === '') {
@@ -22,6 +32,11 @@ export default function PlaylistSelectModal({ onClose }: { onClose: () => void }
 
         if (novaDescricao === '') {
             alert('A descrição da playlist é obrigatória');
+            return;
+        }
+
+        if (!foto) {
+            alert('A imagem da playlist é obrigatória');
             return;
         }
 
@@ -40,15 +55,19 @@ export default function PlaylistSelectModal({ onClose }: { onClose: () => void }
             return;
         }
 
+        const formData = new FormData();
+        formData.append('nome', nova);
+        formData.append('descricao', novaDescricao);
+        formData.append('foto', foto);
 
-
-        await api.post('playlists/', { nome: nova, descricao: novaDescricao }, {
+        await api.post('playlists/', formData, {
             withCredentials: true
         })
             .then(res => setPlaylists([...playlists, res.data]));
         setNova('');
         setNovaDescricao('');
-
+        setFoto(null);
+        setFotoPreview(null);
         onClose();
     };
 
@@ -70,6 +89,18 @@ export default function PlaylistSelectModal({ onClose }: { onClose: () => void }
                         value={novaDescricao}
                         onChange={e => setNovaDescricao(e.target.value)}
                     />
+                    <div className="mt-2">
+                        <label className="block font-semibold mb-1">Imagem da playlist <span className="text-red-600">*</span></label>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={e => setFoto(e.target.files?.[0] || null)}
+                            className="w-full border rounded px-2 py-1"
+                        />
+                        {fotoPreview && (
+                            <img src={fotoPreview} alt="Prévia da imagem" className="w-32 h-20 object-cover rounded mb-2 border mt-2" />
+                        )}
+                    </div>
                     <button className="bg-gray-800 text-white px-3 py-2 rounded shadow-sm hover:bg-gray-700 transition mt-2" onClick={handleCriar}>Criar playlist</button>
                 </div>
             </div>
