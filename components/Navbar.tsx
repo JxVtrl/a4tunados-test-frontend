@@ -4,7 +4,7 @@ export default function Navbar() {
     const { user, logout } = useAuth();
 
     return (
-        <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 16, background: '#eee' }}>
+        <nav className="flex justify-between items-center p-4  text-white fixed top-0 left-0 right-0 z-50 bg-gray-500">
             <div>
                 <b>Plataforma de Aulas</b>
             </div>

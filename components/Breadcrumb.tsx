@@ -9,9 +9,10 @@ interface BreadcrumbItem {
 interface BreadcrumbProps {
     items: BreadcrumbItem[];
     showBack?: boolean; // Se quiser mostrar botão de voltar
+    onClick?: (href: string) => void; // Nova prop opcional
 }
 
-const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
+const Breadcrumb: React.FC<BreadcrumbProps> = ({ items, onClick }) => {
     const router = useRouter();
 
     return (
@@ -23,7 +24,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
                     {item.href ? (
                         <button
                             className="hover:underline"
-                            onClick={() => router.push(item.href!)}
+                            onClick={() => onClick ? onClick(item.href!) : router.push(item.href!)}
                         >
                             {item.label}
                         </button>

@@ -5,10 +5,13 @@ import VideoCard from "../../components/VideoCard"
 import { useRouter } from "next/router"
 import Breadcrumb from "@/components/Breadcrumb"
 import api from "@/utils/axiosConfig"
+import Image from "next/image"
 
 interface Playlist {
   id: number
   nome: string
+  foto: string
+  descricao: string
 }
 
 interface Video {
@@ -35,6 +38,7 @@ export default function PainelAluno() {
   const [searchTerm, setSearchTerm] = useState("") // Estado para busca
   const [filterPlaylistId, setFilterPlaylistId] = useState("") // Estado para filtro de playlist (usado na view "Todos os Vídeos")
   const [sortOption, setSortOption] = useState("criado_em") // Estado para ordenação
+  const [viewMode, setViewMode] = useState<"inicio" | "videos" | "playlists" | "professores">("inicio")
 
   useEffect(() => {
     setLoading(true)
@@ -115,10 +119,118 @@ export default function PainelAluno() {
     router.push(`/painel/aluno?playlist=${playlistId}`)
   }
 
+  // Função para lidar com clique no breadcrumb
+  const handleBreadcrumbClick = (href: string) => {
+    if (href === "/painel/aluno") {
+      setViewMode("inicio")
+      router.push("/painel/aluno")
+    } else {
+      router.push(href)
+    }
+  }
+
+  // Lógica para renderizar a tela inicial de seleção
+  if (viewMode === "inicio") {
+    return (
+      <ProtectedRoute allowedTypes={["aluno"]}>
+        <Navbar />
+        <div className="p-8 pb-[25vh] flex flex-col items-center justify-center min-h-screen bg-gray-100">
+          <h2 className="text-2xl font-bold mb-8 text-center">O que você deseja ver?</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-3xl">
+            <button
+              className="bg-blue-600 text-white rounded-xl shadow-lg p-8 text-xl font-semibold hover:bg-blue-700 transition"
+              onClick={() => setViewMode("videos")}
+            >
+              Todos os Vídeos
+            </button>
+            <button
+              className="bg-green-600 text-white rounded-xl shadow-lg p-8 text-xl font-semibold hover:bg-green-700 transition"
+              onClick={() => setViewMode("playlists")}
+            >
+              Playlists
+            </button>
+            <button
+              className="bg-purple-600 text-white rounded-xl shadow-lg p-8 text-xl font-semibold hover:bg-purple-700 transition"
+              onClick={() => setViewMode("professores")}
+            >
+              Professores
+            </button>
+          </div>
+        </div>
+      </ProtectedRoute>
+    )
+  }
+
+  // Renderização da listagem de Playlists
+  if (viewMode === "playlists") {
+    return (
+      <ProtectedRoute allowedTypes={["aluno"]}>
+        <Navbar />
+        <div className="p-8 bg-gray-100 mt-10 min-h-screen">
+          <Breadcrumb
+            items={[
+              { label: "Painel do Aluno", href: "/painel/aluno" },
+              { label: "Playlists" },
+            ]}
+            onClick={handleBreadcrumbClick}
+          />
+          <h2 className="text-2xl font-bold mb-6 text-center">Playlists</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {playlists.map((pl) => (
+              <div
+                key={pl.id}
+                className="bg-white rounded-xl shadow-lg p-4 cursor-pointer hover:bg-blue-50"
+                onClick={() => {
+                  setViewMode("videos");
+                  router.push(`/painel/aluno?playlist=${pl.id}`)
+                }}
+              >
+                <Image src={pl.foto} alt={pl.nome} width={100} height={100} />
+
+                <h3 className="font-bold text-lg mb-2">{pl.nome}</h3>
+                <p className="text-gray-600">{pl.descricao}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </ProtectedRoute>
+    )
+  }
+
+  // Renderização da listagem de Professores (placeholder)
+  if (viewMode === "professores") {
+    return (
+      <ProtectedRoute allowedTypes={["aluno"]}>
+        <Navbar />
+        <div className="p-8 bg-gray-100 mt-10 min-h-screen">
+          <Breadcrumb
+            items={[
+              { label: "Painel do Aluno", href: "/painel/aluno" },
+              { label: "Professores" },
+            ]}
+            onClick={handleBreadcrumbClick}
+          />
+          <h2 className="text-2xl font-bold mb-6 text-center">Professores</h2>
+          <div className="text-center text-gray-500">(Em breve: listagem de professores)</div>
+        </div>
+      </ProtectedRoute>
+    )
+  }
+
+  // Renderização padrão: Todos os Vídeos (ou vídeos de uma playlist)
   return (
     <ProtectedRoute allowedTypes={["aluno"]}>
       <Navbar />
-      <div className="p-8 bg-gray-100 min-h-screen">
+      <div className="p-8 bg-gray-100 mt-10 min-h-screen">
+        {!playlistSelecionada && (
+          <Breadcrumb
+            items={[
+              { label: "Painel do Aluno", href: "/painel/aluno" },
+              { label: "Todos os Vídeos" },
+            ]}
+            onClick={handleBreadcrumbClick}
+          />
+        )}
         {playlistSelecionada && (
           <Breadcrumb
             items={[
@@ -126,6 +238,7 @@ export default function PainelAluno() {
               { label: playlistSelecionada.nome },
             ]}
             showBack={false}
+            onClick={handleBreadcrumbClick}
           />
         )}
 
