@@ -12,7 +12,7 @@ export default function VideoDetailsStep({ videoFile, onBack, onSubmit }: { vide
     const { token } = useAuth();
 
     const handleSave = () => {
-        onSubmit({ titulo, descricao, playlists, videoFile });
+        onSubmit({ titulo, descricao, playlists: selected, videoFile });
     };
 
     const buscarPlaylists = async () => {
