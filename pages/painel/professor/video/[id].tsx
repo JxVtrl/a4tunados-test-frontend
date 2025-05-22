@@ -81,7 +81,7 @@ export default function VideoProfessorPage() {
                             </button>
                         </div>
                     </div>
-                    <video src={video.arquivo} controls className="w-full rounded mb-4" />
+                    <video src={video.arquivo} controls className="w-full rounded mb-4 aspect-video" poster={video.thumbnail} preload="metadata" autoPlay={false} muted={false} loop={false} playsInline={false} controlsList="nodownload" disablePictureInPicture={false} disableRemotePlayback={false} />
                     <div className="flex items-center gap-2 mb-2">
                         <Avatar name={video.professor_nome || video.professor?.username || "?"} size="40px" onClick={() => { }} />
                         <span className="text-gray-700 font-medium">
