@@ -94,7 +94,7 @@ export default function VideoProfessorPage() {
                     </span>
                 </div>
                 {editModalOpen && (
-                    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+                    <div className="fixed inset-0 bg-[#00000080] flex items-center justify-center z-50">
                         <div className="bg-white rounded-xl shadow-lg w-full max-w-lg p-6 relative border border-gray-200">
                             <button className="absolute top-2 right-2 text-2xl text-gray-400 hover:text-gray-700" onClick={() => setEditModalOpen(false)}>
                                 ×
@@ -102,7 +102,7 @@ export default function VideoProfessorPage() {
                             <h2 className="text-xl font-bold mb-4 text-gray-900">Editar Vídeo</h2>
                             <VideoForm
                                 onSubmit={handleEdit}
-                                initialData={{ titulo: video.titulo, descricao: video.descricao, playlistsIds: video.playlists?.map((pl: any) => pl.id) || [] }}
+                                initialData={{ titulo: video.titulo, descricao: video.descricao, playlistsIds: video.playlists?.map((pl: any) => pl.id) || [], thumbnail: video.thumbnail }}
                                 editMode
                                 onCancel={() => setEditModalOpen(false)}
                                 loading={loading}

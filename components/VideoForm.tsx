@@ -41,10 +41,12 @@ export default function VideoForm({ onSubmit, initialData, loading, success, err
     useEffect(() => {
         if (thumbnailFile) {
             setThumbnailPreview(URL.createObjectURL(thumbnailFile));
+        } else if (editMode && initialData?.thumbnail) {
+            setThumbnailPreview(initialData.thumbnail);
         } else {
             setThumbnailPreview(null);
         }
-    }, [thumbnailFile]);
+    }, [thumbnailFile, editMode, initialData]);
 
     const handlePlaylistCreate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -99,9 +101,9 @@ export default function VideoForm({ onSubmit, initialData, loading, success, err
             {editMode ? (
                 <div className="mb-4">
                     <label className="block mb-1 font-semibold text-gray-700">Thumbnail</label>
-                    <input type="file" accept="image/*" onChange={e => setArquivo(e.target.files?.[0] || null)} className="w-full mb-2" />
-                    {initialData?.thumbnail && (
-                        <img src={initialData.thumbnail} alt="Thumbnail atual" className="w-32 h-20 object-cover rounded mb-2 border" />
+                    <input type="file" accept="image/*" onChange={e => setThumbnailFile(e.target.files?.[0] || null)} className="w-full mb-2" />
+                    {thumbnailPreview && (
+                        <img src={thumbnailPreview} alt="Thumbnail atual" className="w-32 h-20 object-cover rounded mb-2 border" />
                     )}
                 </div>
             ) : (
