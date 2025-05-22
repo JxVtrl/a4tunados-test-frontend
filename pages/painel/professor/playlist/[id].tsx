@@ -6,6 +6,7 @@ import VideoCard from "@/components/VideoCard"
 import Navbar from "@/components/Navbar"
 import ProtectedRoute from "@/components/ProtectedRoute"
 import EditPlaylistModal from "@/components/EditPlaylistModal"
+import VideoUploadModal from "@/components/VideoUploadModal"
 
 export default function PlaylistProfessorPage() {
     const router = useRouter()
@@ -13,6 +14,7 @@ export default function PlaylistProfessorPage() {
     const [playlist, setPlaylist] = useState<any>(null)
     const [videos, setVideos] = useState<any[]>([])
     const [editModalOpen, setEditModalOpen] = useState(false)
+    const [uploadModalOpen, setUploadModalOpen] = useState(false)
 
     const fetchPlaylist = () => {
         if (!id) return
@@ -20,11 +22,15 @@ export default function PlaylistProfessorPage() {
             .then(res => setPlaylist(res.data))
     }
 
-    useEffect(() => {
-        fetchPlaylist()
+    const fetchVideos = () => {
         if (!id) return
         api.get(`playlists/${id}/videos/`, { withCredentials: true })
             .then(res => setVideos(res.data))
+    }
+
+    useEffect(() => {
+        fetchPlaylist()
+        fetchVideos()
     }, [id])
 
     return (
@@ -40,12 +46,20 @@ export default function PlaylistProfessorPage() {
                 />
                 <div className="flex items-center gap-4 mb-4 justify-between">
                     <h2 className="text-2xl font-bold text-gray-900">{playlist?.nome}</h2>
-                    <button
-                        className="px-3 py-1 bg-gray-800 text-white rounded shadow-sm hover:bg-gray-700 transition border border-gray-700 text-sm"
-                        onClick={() => setEditModalOpen(true)}
-                    >
-                        Editar playlist
-                    </button>
+                    <div className="flex gap-2">
+                        <button
+                            className="px-3 py-1 bg-blue-700 text-white rounded shadow-sm hover:bg-blue-800 transition border border-blue-800 text-sm"
+                            onClick={() => setUploadModalOpen(true)}
+                        >
+                            Enviar vídeo
+                        </button>
+                        <button
+                            className="px-3 py-1 bg-gray-800 text-white rounded shadow-sm hover:bg-gray-700 transition border border-gray-700 text-sm"
+                            onClick={() => setEditModalOpen(true)}
+                        >
+                            Editar playlist
+                        </button>
+                    </div>
                 </div>
                 <p className="text-gray-600 mb-6">{playlist?.descricao}</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -71,6 +85,14 @@ export default function PlaylistProfessorPage() {
                         onClose={() => setEditModalOpen(false)}
                         playlist={playlist}
                         onSave={fetchPlaylist}
+                    />
+                )}
+                {uploadModalOpen && playlist && (
+                    <VideoUploadModal
+                        open={uploadModalOpen}
+                        onClose={() => setUploadModalOpen(false)}
+                        onVideoUploaded={fetchVideos}
+                        playlistId={playlist.id}
                     />
                 )}
             </div>
