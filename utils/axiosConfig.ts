@@ -10,7 +10,7 @@ function getCookie(name: string) {
 
 const api = axios.create({
     withCredentials: true,
-    baseURL: "http://localhost:8000/api/",
+    baseURL: "http://localhost:8081/api/",
 });
 
 // Interceptor para refresh automático do token
