@@ -46,8 +46,6 @@ export default function TodosVideosProfessor() {
                 {loading && <p className="text-center text-gray-600">Carregando...</p>}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {allVideos.map((video) => {
-                        console.log(`video`, video)
-
                         return (
                             <VideoCard
                                 key={video.id}
@@ -57,7 +55,7 @@ export default function TodosVideosProfessor() {
                                 criado_em={video.criado_em}
                                 professor_nome={video.professor_nome}
                                 showActions
-                                thumbnail={video.thumbnail}
+                                thumbnail={video.thumbnail.replace(`http://`, `https://`)}
                                 professor_id={video.professor_id}
                             />
                         )

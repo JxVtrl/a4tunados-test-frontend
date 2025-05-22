@@ -76,14 +76,14 @@ export default function VideoCard({
       </div>
       <div className="w-full flex gap-3 py-3 px-4 items-center border-t border-gray-200">
         {professor_nome && (
-          <Link href={`/painel/aluno/professor/${professor_id}`} className="relative group/avatar cursor-pointer" title={professor_nome}>
+          <button onClick={() => router.push(`/painel/aluno/professor/${professor_id}`)} className="relative group/avatar cursor-pointer" title={professor_nome}>
             <Avatar
               imageUrl=""
               name={professor_nome}
               size={`40px`}
               onClick={() => { }}
             />
-          </Link>
+          </button>
         )}
         <div className="flex-1 flex flex-col gap-1 min-w-0">
           <p className="text-lg font-semibold text-gray-900 truncate  px-1 rounded transition">

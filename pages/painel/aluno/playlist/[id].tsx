@@ -38,18 +38,22 @@ export default function PlaylistAluno() {
                 <h3 className="text-xl font-bold text-gray-900 mb-4">Vídeos da Playlist</h3>
                 {loading && <p className="text-center text-gray-500">Carregando vídeos...</p>}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {videos.map((video) => (
-                        <VideoCard
-                            key={video.id}
-                            titulo={video.titulo}
-                            descricao={video.descricao}
-                            link={`/video/${video.id}`}
-                            criado_em={video.criado_em}
-                            professor_nome={video.professor_nome}
-                            thumbnail={video.thumbnail}
-                            professor_id={video.professor_id}
-                        />
-                    ))}
+                    {videos.map((video) => {
+                        console.log(`video`, video)
+
+                        return (
+                            <VideoCard
+                                key={video.id}
+                                titulo={video.titulo}
+                                descricao={video.descricao}
+                                link={`/video/${video.id}`}
+                                criado_em={video.criado_em}
+                                professor_nome={video.professor_nome}
+                                thumbnail={video.thumbnail}
+                                professor_id={video.professor_id}
+                            />
+                        )
+                    })}
                     {videos.length === 0 && !loading && (
                         <div className="col-span-full text-center text-gray-500">Nenhum vídeo encontrado.</div>
                     )}

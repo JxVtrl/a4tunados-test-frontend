@@ -52,9 +52,7 @@ export default function VideoPage() {
     api.get("videos/")
       .then((res) => res.data)
       .then((data: any) => {
-        console.log(`data`, data)
         const filteredVideos = data.filter((item: any) => item.id !== id)
-        console.log(`filteredVideos`, filteredVideos)
         setOutrosVideos(filteredVideos)
       })
   }, [id])

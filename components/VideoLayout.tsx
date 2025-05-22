@@ -7,15 +7,13 @@ export default function VideoLayout({ video }: {
     video: Video
 }) {
     const router = useRouter()
-
-    console.log(`video`, video)
     return (
         <div className="flex-1 bg-white rounded-xl shadow p-6">
             <video
                 src={video.arquivo.replace(`http://`, `https://`)}
                 controls
                 className="w-full rounded mb-4 aspect-video"
-                poster={video.thumbnail}
+                poster={video.thumbnail.replace(`http://`, `https://`)}
                 preload="metadata"
                 autoPlay={false}
                 muted={false}

@@ -76,7 +76,7 @@ export default function EditPlaylistModal({
           <label className="block font-semibold text-gray-700">Foto</label>
           {playlist.foto && (
             <Image
-              src={playlist.foto || "/default_playlist.png"}
+              src={playlist.foto.replace(`http://`, `https://`)}
               alt="Playlist"
               width={200}
               height={200}

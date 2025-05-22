@@ -103,7 +103,7 @@ export default function VideoForm({ onSubmit, initialData, loading, success, err
                     <label className="block mb-1 font-semibold text-gray-700">Thumbnail</label>
                     <input type="file" accept="image/*" onChange={e => setThumbnailFile(e.target.files?.[0] || null)} className="w-full mb-2" />
                     {thumbnailPreview && (
-                        <img src={thumbnailPreview} alt="Thumbnail atual" className="w-32 h-20 object-cover rounded mb-2 border" />
+                        <img src={thumbnailPreview.replace(`http://`, `https://`)} alt="Thumbnail atual" className="w-32 h-20 object-cover rounded mb-2 border" />
                     )}
                 </div>
             ) : (
@@ -131,7 +131,7 @@ export default function VideoForm({ onSubmit, initialData, loading, success, err
                             className="w-full mb-2"
                         />
                         {thumbnailPreview && (
-                            <img src={thumbnailPreview} alt="Prévia da thumbnail" className="w-32 h-20 object-cover rounded mb-2 border" />
+                            <img src={thumbnailPreview.replace(`http://`, `https://`)} alt="Prévia da thumbnail" className="w-32 h-20 object-cover rounded mb-2 border" />
                         )}
                     </div>
                 </>

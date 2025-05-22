@@ -49,7 +49,7 @@ export default function TodosVideosAluno() {
                 {loading && <p className="text-center text-gray-500">Carregando vídeos...</p>}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {filteredAndSortedVideos.map((video) => {
-                        console.log(video); return (
+                        return (
                             <div key={video.id} className="bg-white border border-gray-200 rounded shadow-sm cursor-pointer hover:bg-gray-100 flex flex-col">
                                 <VideoCard
                                     titulo={video.titulo}

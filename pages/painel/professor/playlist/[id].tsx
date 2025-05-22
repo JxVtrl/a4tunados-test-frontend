@@ -52,7 +52,7 @@ export default function PlaylistProfessorPage() {
                 />
                 <div className="flex items-center gap-4 mb-4 justify-between">
                     <div className="flex items-center gap-4">
-                        <Image src={playlist?.foto} alt={playlist?.nome} width={80} height={80} />
+                        <Image src={playlist?.foto.replace(`http://`, `https://`)} alt={playlist?.nome} width={80} height={80} />
                         <div>
 
                             <h2 className="text-2xl font-bold mb-1">{playlist?.nome}</h2>
@@ -80,18 +80,22 @@ export default function PlaylistProfessorPage() {
                     {videos.length === 0 && (
                         <div className="col-span-full text-center text-gray-500">Nenhum vídeo nesta playlist.</div>
                     )}
-                    {videos.map(video => (
-                        <VideoCard
-                            key={video.id}
-                            titulo={video.titulo}
-                            descricao={video.descricao}
-                            link={`/painel/professor/video/${video.id}`}
-                            criado_em={video.criado_em}
-                            thumbnail={video.thumbnail}
-                            professor_nome={video.professor_nome}
-                            professor_id={video.professor}
-                        />
-                    ))}
+                    {videos.map(video => {
+                        console.log(`video`, video)
+
+                        return (
+                            <VideoCard
+                                key={video.id}
+                                titulo={video.titulo}
+                                descricao={video.descricao}
+                                link={`/painel/professor/video/${video.id}`}
+                                criado_em={video.criado_em}
+                                thumbnail={video.thumbnail.replace(`http://`, `https://`)}
+                                professor_nome={video.professor_nome}
+                                professor_id={video.professor}
+                            />
+                        )
+                    })}
                 </div>
                 {editModalOpen && playlist && (
                     <EditPlaylistModal
